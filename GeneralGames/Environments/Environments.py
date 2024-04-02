@@ -3,10 +3,10 @@ from enum import Enum
 
 
 class DirectionsGridWorld(Enum):
-    UP = 3
-    DOWN = 1
-    LEFT = 2
-    RIGHT = 4
+    UP = 3, "UP"
+    DOWN = 1, "DOWN"
+    LEFT = 2, "LEFT"
+    RIGHT = 4, "RIGHT"
 
 
 class Gridworld:
@@ -19,10 +19,10 @@ class Gridworld:
         self.goal = [goal[0], goal[1]]
         self.obstical = []
         self.directions = {
-            "UP": self.__up,
-            "DOWN": self.__down,
-            "LEFT": self.__left,
-            "RIGHT": self.__right,
+            DirectionsGridWorld.UP: self.__up,
+            DirectionsGridWorld.DOWN: self.__down,
+            DirectionsGridWorld.LEFT: self.__left,
+            DirectionsGridWorld.RIGHT: self.__right,
         }
 
     def setBoundaries(self, boundary):
