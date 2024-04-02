@@ -13,3 +13,6 @@ class Env:
             return q_value, q_value_std
         else:
             return q_value
+
+    def update_q_value(self, reward_observation, q_old, n):
+        return ((n-1)/n)*q_old + (1/n)*reward_observation

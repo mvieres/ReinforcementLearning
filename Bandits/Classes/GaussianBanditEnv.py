@@ -5,7 +5,7 @@ from Env import Env
 
 class GaussianBanditEnv(Env):
 
-    def __init__(self, mean_param, max_steps):
+    def __init__(self, mean_param, max_steps, actions):
         """
         Create a multiarmed bandit with len(mean_param) arms
         :param mean_param:
@@ -18,12 +18,13 @@ class GaussianBanditEnv(Env):
         self.steps = 1
         self.mean_param = mean_param
         self.max_steps = max_steps
+        self.actions = actions
 
         pass
 
     def step(self, action_index):
         """
-        Roll out bandit given the played action
+        Roll out one step given the played action
         :param action_index:
         :return: new state, reward, info
         """
