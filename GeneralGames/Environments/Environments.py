@@ -14,7 +14,7 @@ class Gridworld:
     def __init__(self, width, height, goal):
         self.width = width
         self.height = height
-        self.boundaries = None
+        self.boundaries = [width, height]
         self.player = [1, 1]
         self.goal = [goal[0], goal[1]]
         self.obstical = []
@@ -24,6 +24,9 @@ class Gridworld:
             DirectionsGridWorld.LEFT: self.__left,
             DirectionsGridWorld.RIGHT: self.__right,
         }
+
+    def getPosition(self):
+        return self.player
 
     def setBoundaries(self, boundary):
         self.boundaries = boundary
@@ -35,9 +38,10 @@ class Gridworld:
         return self.boundaries
 
     def setObstical(self, obsticalList):
-        self.boundaries = self.boundaries.append(obsticalList)
+        self.obstical = self.obstical.append(obsticalList)
 
     def isInBoundaries(self, pos):
+        # Wrong Boundaries
         return (pos[0] <= self.boundaries[0]) and (pos[1] <= self.boundaries[1])
 
     def hasHitGoal(self, pos):
@@ -79,9 +83,9 @@ class Gridworld:
             self.player[0] -= 1
             AssertionError("No valid Direction")  # Make this different
 
-    def step(self, direction):
+    def move(self, direction):
         if not self.hasHitGoal(self.player):
-            if direction in self.directions:
+            if direction in self.directions: #That does not work
                 return self.directions[direction]
             else:
                 AssertionError("Step rollout failed")
