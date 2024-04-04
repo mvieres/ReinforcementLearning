@@ -41,10 +41,9 @@ class Gridworld:
         self.obstical = self.obstical.append(obsticalList)
 
     def isInBoundaries(self, pos):
-        # Wrong Boundaries
-        return (pos[0] <= self.boundaries[0]) and (pos[1] <= self.boundaries[1])
+        return (0 <= pos[0] <= self.boundaries[0]) and (0 <= pos[1] <= self.boundaries[1])
 
-    def hasHitGoal(self, pos):
+    def isTerminal(self, pos):
         return (pos[0] == self.goal[0]) and (pos[1] == self.goal[1])
 
     def __up(self):
@@ -54,7 +53,7 @@ class Gridworld:
             return
         else:
             self.player[1] -= 1
-            AssertionError("No valid Direction")  # Make this different
+            raise AssertionError("No valid Direction")  # Make this different
 
     def __down(self):
         self.player[1] -= 1
@@ -63,7 +62,7 @@ class Gridworld:
             return
         else:
             self.player[1] += 1
-            AssertionError("No valid Direction")  # Make this different
+            raise AssertionError("No valid Direction")  # Make this different
 
     def __left(self):
         self.player[0] -= 1
@@ -72,23 +71,24 @@ class Gridworld:
             return
         else:
             self.player[0] += 1
-            AssertionError("No valid Direction")  # Make this different
+            raise AssertionError("No valid Direction")  # Make this different
 
     def __right(self):
-        self.player[0] += 1
-        if self.isInBoundaries(self.player):
-
-            return
-        else:
-            self.player[0] -= 1
-            AssertionError("No valid Direction")  # Make this different
+        if not self.isTerminal(self.player):
+            self.player[0] += 1
 
     def move(self, direction):
-        if not self.hasHitGoal(self.player):
-            if direction in self.directions: #That does not work
-                return self.directions[direction]
+        if not self.isTerminal(self.player):
+            if direction == 1:
+                return self.__down()
+            elif direction == 2:
+                return self.__left()
+            elif direction == 3:
+                return self.__up()
+            elif direction == 4:
+                return self.__right()
             else:
-                AssertionError("Step rollout failed")
+                raise AssertionError("Step rollout failed")
         else:
-            info_flag = "Game already finished, no step needed"
-            return info_flag
+
+            return [], False, "No valid step"

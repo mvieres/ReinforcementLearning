@@ -19,10 +19,16 @@ class TestGridworldDirections(unittest.TestCase):
 class TestGridWorld(unittest.TestCase):
 
     def test_Momvement(self):
-        gridworld = Gridworld(3, 3, [3, 3])
-        gridworld.setStartingPoint([1, 1])
-        gridworld.move(DGW.UP.value[0])
-        self.assertEqual([1, 2], gridworld.getPosition())
+        gridworld = Gridworld(10, 10, [3, 3])
+        gridworld.setStartingPoint([0, 0])
+        gridworld.move(4)
+        self.assertEqual([1, 0], gridworld.getPosition())
+        gridworld.move(3)
+        self.assertEqual([1, 1], gridworld.getPosition())
+        gridworld.move(2)
+        self.assertEqual([0, 1], gridworld.getPosition())
+        gridworld.move(1)
+        self.assertEqual([0, 0], gridworld.getPosition())
 
 
 if __name__ == '__main__':
