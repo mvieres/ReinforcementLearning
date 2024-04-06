@@ -1,4 +1,3 @@
-import numpy as np
 from enum import Enum
 
 
@@ -18,12 +17,6 @@ class Gridworld:
         self.player = [1, 1]
         self.goal = [goal[0], goal[1]]
         self.obstical = []
-        self.directions = {
-            DirectionsGridWorld.UP: self.__up,
-            DirectionsGridWorld.DOWN: self.__down,
-            DirectionsGridWorld.LEFT: self.__left,
-            DirectionsGridWorld.RIGHT: self.__right,
-        }
 
     def getPosition(self):
         return self.player
@@ -43,8 +36,8 @@ class Gridworld:
     def isInBoundaries(self, pos):
         return (0 <= pos[0] <= self.boundaries[0]) and (0 <= pos[1] <= self.boundaries[1])
 
-    def isTerminal(self, pos):
-        return (pos[0] == self.goal[0]) and (pos[1] == self.goal[1])
+    def isTerminal(self):
+        return (self.player[0] == self.goal[0]) and (self.player[1] == self.goal[1])
 
     def __up(self):
         self.player[1] += 1
@@ -74,21 +67,21 @@ class Gridworld:
             raise AssertionError("No valid Direction")  # Make this different
 
     def __right(self):
-        if not self.isTerminal(self.player):
+        if not self.isTerminal():
             self.player[0] += 1
 
     def move(self, direction):
-        if not self.isTerminal(self.player):
-            if direction == 1:
-                return self.__down()
-            elif direction == 2:
-                return self.__left()
-            elif direction == 3:
-                return self.__up()
-            elif direction == 4:
-                return self.__right()
-            else:
-                raise AssertionError("Step rollout failed")
-        else:
-
+        if self.isTerminal():
             return [], False, "No valid step"
+
+        moves = {
+            1: self.__down,
+            2: self.__left,
+            3: self.__up,
+            4: self.__right
+        }
+
+        if direction not in moves:
+            raise AssertionError("Step rollout failed")
+
+        return moves[direction]()
