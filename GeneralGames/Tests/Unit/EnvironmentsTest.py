@@ -11,10 +11,6 @@ class TestGridworldDirections(unittest.TestCase):
         self.assertEqual(DGW.UP.value[0], 3)
         self.assertEqual(DGW.DOWN.value[0], 1)
 
-    def test_something(self):
-
-        self.assertEqual(True, False)  # add assertion here
-
 
 class TestGridWorld(unittest.TestCase):
 
@@ -29,6 +25,33 @@ class TestGridWorld(unittest.TestCase):
         self.assertEqual([0, 1], gridworld.getPosition())
         gridworld.move(1)
         self.assertEqual([0, 0], gridworld.getPosition())
+
+    def test_Movement_boundary(self):
+        gridworld = Gridworld(10, 10, [3, 3])
+        gridworld.setStartingPoint([0, 0])
+        gridworld.move(2)
+        self.assertEqual([0, 0], gridworld.getPosition())
+
+    def test_goal(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setStartingPoint([1, 1])
+        result = gridworld.isPositiveTerminal()
+        self.assertEqual(True, result)
+
+    def test_cliff(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setStartingPoint([1, 1])
+        gridworld.setCliff([1, 1])
+        self.assertEqual(True, gridworld.isNegativeTerminal())
+
+    def test_isinboundaries(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.player = [-1, 3]
+        self.assertEqual(False, gridworld.isInBoundaries())
+
+    def test_setObstical(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setCliff([1, 1])
 
 
 if __name__ == '__main__':
