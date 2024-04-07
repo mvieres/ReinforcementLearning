@@ -43,6 +43,9 @@ class TestGridWorld(unittest.TestCase):
         gridworld.setStartingPoint([1, 1])
         gridworld.setCliff([1, 1])
         self.assertEqual(True, gridworld.isNegativeTerminal())
+        gridworld.setCliff([2, 2])
+        gridworld.player = [2, 2]
+        self.assertEqual(True, gridworld.isNegativeTerminal())
 
     def test_isinboundaries(self):
         gridworld = Gridworld(10, 10, [1, 1])

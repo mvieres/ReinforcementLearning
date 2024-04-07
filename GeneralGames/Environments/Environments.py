@@ -18,6 +18,7 @@ class Gridworld:
         self.player = [1, 1]
         self.goal = [goal[0], goal[1]]
         self.cliff = []
+        self.startingpoint = None
 
     def getPosition(self):
         return self.player
@@ -27,6 +28,7 @@ class Gridworld:
 
     def setStartingPoint(self, start):
         self.player = [start[0], start[1]]
+        self.startingpoint = self.player
 
     def getBoundaries(self):
         return self.boundaries
@@ -38,6 +40,9 @@ class Gridworld:
         assert len(rewardList)>0
         assert rewardList[1] < 0
         self.rewards = rewardList
+
+    def resetPlayerToStart(self):
+        self.player = self.startingpoint
 
     def isInBoundaries(self):
         return (0 <= self.player[0] <= self.boundaries[0]) and (0 <= self.player[1] <= self.boundaries[1])
@@ -94,7 +99,7 @@ class Gridworld:
             3: self.__up,
             4: self.__right
         }
-        x_old = self.player
+
         if direction not in moves:
             raise AssertionError("Step rollout failed")
         return moves[direction]()

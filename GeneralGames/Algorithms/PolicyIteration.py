@@ -1,9 +1,7 @@
 import random as rand
 
-import numpy as np
 
-
-class AlgoBase:
+class PolicyIteration:
 
     def __int__(self):
         pass

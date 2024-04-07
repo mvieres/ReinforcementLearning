@@ -1,6 +1,6 @@
 from behave import given, then
 
-from GeneralGames.Algorithms.AlgoBase import AlgoBase
+from GeneralGames.Algorithms.PolicyIteration import AlgoBase
 
 
 class AlgoTest:

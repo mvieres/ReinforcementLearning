@@ -1,6 +1,6 @@
 import unittest
 
-from GeneralGames.Algorithms.AlgoBase import AlgoBase
+from GeneralGames.Algorithms.PolicyIteration import AlgoBase
 
 
 class MyTestCase(unittest.TestCase):
