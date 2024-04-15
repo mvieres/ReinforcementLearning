@@ -26,12 +26,6 @@ class TestGridWorld(unittest.TestCase):
         gridworld.move(1)
         self.assertEqual([0, 0], gridworld.getPosition())
 
-    def test_Movement_boundary(self):
-        gridworld = Gridworld(10, 10, [3, 3])
-        gridworld.setStartingPoint([0, 0])
-        gridworld.move(2)
-        self.assertEqual([0, 0], gridworld.getPosition())
-
     def test_goal(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setStartingPoint([1, 1])

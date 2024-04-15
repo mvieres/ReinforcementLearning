@@ -15,42 +15,46 @@ class Gridworld:
         self.width = width
         self.height = height
         self.boundaries = [width, height]
-        self.player = [1, 1]
+        self.player = None
         self.goal = [goal[0], goal[1]]
         self.cliff = []
-        self.startingpoint = None
+        self.startingPoint = None
 
-    def getPosition(self):
+    def getPosition(self) -> list:
         return self.player
 
-    def setBoundaries(self, boundary):
+    def setPosition(self, pos) -> None:
+        self.player = pos
+
+    def setBoundaries(self, boundary) -> None:
         self.boundaries = boundary
 
-    def setStartingPoint(self, start):
+    def setStartingPoint(self, start) -> None:
+        assert isinstance(start, list)
         self.player = [start[0], start[1]]
-        self.startingpoint = self.player
+        self.startingPoint = self.player
 
-    def getBoundaries(self):
+    def getBoundaries(self) -> list:
         return self.boundaries
 
     def setCliff(self, obsitcal):
         self.cliff.append(obsitcal)
 
-    def setRewards(self, rewardList):
-        assert len(rewardList)>0
+    def setRewards(self, rewardList) -> None:
+        assert len(rewardList) > 0
         assert rewardList[1] < 0
         self.rewards = rewardList
 
-    def resetPlayerToStart(self):
-        self.player = self.startingpoint
+    def resetPlayerToStart(self) -> None:
+        self.player = self.startingPoint
 
-    def isInBoundaries(self):
+    def isInBoundaries(self) -> bool:
         return (0 <= self.player[0] <= self.boundaries[0]) and (0 <= self.player[1] <= self.boundaries[1])
 
-    def isPositiveTerminal(self):
+    def isPositiveTerminal(self) -> bool:
         return self.player == self.goal
 
-    def isNegativeTerminal(self):
+    def isNegativeTerminal(self) -> bool:
         return any(all(item in sublist for item in self.player) for sublist in self.cliff)
 
     def isTerminal(self):
@@ -62,7 +66,7 @@ class Gridworld:
             return
         else:
             self.player[1] -= 1
-            return
+            raise Exception
 
     def __down(self):
         self.player[1] -= 1
@@ -71,7 +75,7 @@ class Gridworld:
             return
         else:
             self.player[1] += 1
-            return
+            raise Exception
 
     def __left(self):
         self.player[0] -= 1
@@ -79,7 +83,7 @@ class Gridworld:
             return
         else:
             self.player[0] += 1
-            return
+            raise Exception
 
     def __right(self):
         self.player[0] += 1
@@ -87,11 +91,9 @@ class Gridworld:
             return
         else:
             self.player[0] -= 1
-            return
+            raise Exception
 
-    def move(self, direction):
-        if self.isTerminal():
-            return [], False, "No valid step"
+    def move(self, direction) -> None:
 
         moves = {
             1: self.__down,
@@ -104,10 +106,11 @@ class Gridworld:
             raise AssertionError("Step rollout failed")
         return moves[direction]()
 
-    def rolloutReward(self):
-        # Rollout strictly for Gridworld with reward profiles
+    def rolloutReward(self) -> float:
+        # Rollout strictly for Gridworld reward profiles
         if self.isPositiveTerminal():
             return self.rewards[0]
-
-        if self.isNegativeTerminal():
+        elif self.isNegativeTerminal():
             return self.rewards[1]
+        else:
+            return self.rewards[2]
