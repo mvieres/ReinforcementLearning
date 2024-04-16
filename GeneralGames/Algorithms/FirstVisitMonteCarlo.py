@@ -10,7 +10,7 @@ class MonteCarloPolicyEvaluation:
         self.maxIteration = maxIteration
         self.policy = None
         self.initialDistribution = initialDistribution
-        self.pathUntilTermination = []
+        self.pathUntilTermination = np.array([])
         self.tol = tol
         self.visitations = {}
         self.env = Environments.Gridworld(width, height, goal)
@@ -24,14 +24,14 @@ class MonteCarloPolicyEvaluation:
         self.env.resetPlayerToStart()
         self.rewardPath = {}
         self.visitations = {}
-        self.pathUntilTermination = []
+        self.pathUntilTermination = [self.env.startingPoint]
 
     def setPolicy(self):
         # TODO: Mapping to use epsilon greedy etc.
         return
 
-    def update_path(self):
-        self.pathUntilTermination.append(self.env.player)
+    def __addToSamplePath(self):
+        self.pathUntilTermination.append([self.env.player])
         return
 
     def compute_V_value(self):
@@ -57,23 +57,29 @@ class MonteCarloPolicyEvaluation:
         self.env.setPosition(pos)
 
     def generateSamplePaths(self):  # Roll out one sample path
+        self.__resetSamplePath()
         while not self.env.isTerminal():  # Sample path
             actions = [1, 2, 3, 4]
-            for action in actions:  # check for valid actions
+            for action in [1, 2, 3, 4]:  # check for valid actions
                 try:
-                    self.env.move(action)
+                    self.env.moveTest(action)
                 except:
                     actions.remove(action)
+
             if self.policy is None:
                 action_played = rnd.choice(actions)  # Uniform Sampling
             else:
                 raise Exception("?")
-            self.env.move(action_played)
+            self.env.moveRestricted(action_played)
+            self.__addToSamplePath()
         return
 
     def updateRewards(self):
         for key in self.rewardPath.keys():
             self.rewardPath[key] = self.env.rolloutReward()
+
+    def __resetSamplePath(self):
+        self.pathUntilTermination = [self.env.startingPoint]
 
     def firstVisitPolicyEvalV(self):
         while not self.converged():

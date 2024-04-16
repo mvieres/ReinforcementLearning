@@ -17,13 +17,13 @@ class TestGridWorld(unittest.TestCase):
     def test_Momvement(self):
         gridworld = Gridworld(10, 10, [3, 3])
         gridworld.setStartingPoint([0, 0])
-        gridworld.move(4)
+        gridworld.moveRestricted(4)
         self.assertEqual([1, 0], gridworld.getPosition())
-        gridworld.move(3)
+        gridworld.moveRestricted(3)
         self.assertEqual([1, 1], gridworld.getPosition())
-        gridworld.move(2)
+        gridworld.moveRestricted(2)
         self.assertEqual([0, 1], gridworld.getPosition())
-        gridworld.move(1)
+        gridworld.moveRestricted(1)
         self.assertEqual([0, 0], gridworld.getPosition())
 
     def test_goal(self):
@@ -42,13 +42,18 @@ class TestGridWorld(unittest.TestCase):
         self.assertEqual(True, gridworld.isNegativeTerminal())
 
     def test_isinboundaries(self):
-        gridworld = Gridworld(10, 10, [1, 1])
-        gridworld.player = [-1, 3]
+        gridworld = Gridworld(10, 10, [3, 3])
+        gridworld.player = [-1, 0]
         self.assertEqual(False, gridworld.isInBoundaries())
 
     def test_setObstical(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setCliff([1, 1])
+
+    def test_terminal(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setPosition([1, 1])
+        self.assertEqual(True, gridworld.isTerminal())
 
 
 if __name__ == '__main__':

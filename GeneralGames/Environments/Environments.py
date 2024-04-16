@@ -93,13 +93,92 @@ class Gridworld:
             self.player[0] -= 1
             raise Exception
 
-    def move(self, direction) -> None:
+    def moveRestricted(self, direction) -> None:
 
         moves = {
             1: self.__down,
             2: self.__left,
             3: self.__up,
             4: self.__right
+        }
+
+        if direction not in moves:
+            raise AssertionError("Step rollout failed")
+        return moves[direction]()
+
+    def __upUnres(self):
+        self.player[1] += 1
+        return
+
+    def __downUnres(self):
+        self.player[1] -= 1
+        return
+
+    def __leftUnres(self):
+        self.player[0] -= 1
+        return
+
+    def __rightUnres(self):
+        self.player[0] += 1
+        return
+
+    def move(self, direction) -> None:
+
+        moves = {
+            1: self.__downUnres,
+            2: self.__leftUnres,
+            3: self.__upUnres,
+            4: self.__rightUnres
+        }
+
+        if direction not in moves:
+            raise AssertionError("Step rollout failed")
+        return moves[direction]()
+
+
+    def __upTest(self):
+        self.player[1] += 1
+        if self.isInBoundaries():
+            self.player[1] -= 1
+            return
+        else:
+            self.player[1] -= 1
+            raise Exception
+
+    def __downTest(self):
+        self.player[1] -= 1
+        if self.isInBoundaries():
+            self.player[1] += 1
+            return
+        else:
+            self.player[1] += 1
+            raise Exception
+
+    def __leftTest(self):
+        self.player[0] -= 1
+        if self.isInBoundaries():
+            self.player[0] += 1
+            return
+        else:
+            self.player[0] += 1
+            raise Exception
+
+    def __rightTest(self):
+        self.player[0] += 1
+        if self.isInBoundaries():
+            self.player[0] -= 1
+            return
+        else:
+            self.player[0] -= 1
+            raise Exception
+
+    def moveTest(self, direction) -> None:
+
+        moves = {
+            1: self.__downTest,
+            2: self.__leftTest,
+            3: self.__upTest,
+            4: self.__rightTest
         }
 
         if direction not in moves:
