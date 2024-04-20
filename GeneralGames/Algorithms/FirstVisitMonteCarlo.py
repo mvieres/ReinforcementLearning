@@ -10,13 +10,20 @@ class MonteCarloPolicyEvaluation:
         self.maxIteration = maxIteration
         self.policy = None
         self.initialDistribution = initialDistribution
-        self.pathUntilTermination = np.array([])
+        self.pathUntilTermination = []
         self.tol = tol
         self.visitations = {}
         self.env = Environments.Gridworld(width, height, goal)
         self.gamma = gamma
+        self.value = {}
 
-    def setStartingPoint(self, start):
+    def getValue(self) -> dict:
+        return self.value
+
+    def setMaxIterations(self, maxIterations: int) -> None:
+        self.maxIteration = maxIterations
+
+    def setStartingPoint(self, start: list):
         self.env.player = start
         self.env.startingPoint = start
 
@@ -31,34 +38,34 @@ class MonteCarloPolicyEvaluation:
         return
 
     def __addToSamplePath(self):
-        self.pathUntilTermination.append([self.env.player])
+        self.pathUntilTermination.append(tuple(self.env.player))
         return
 
     def compute_V_value(self):
 
         pass
 
-    def converged(self):
-        return np.abs(1 - 2) < self.tol  # TODO
+    def converged(self) -> bool:
+        # Placeholder
+        return True
 
-    def addToDict(self):
+    def addToDict(self) -> None:
+        # TODO: change setup
         player_as_tuple = tuple(self.env.player)
         if player_as_tuple not in self.rewardPath:
             self.rewardPath[player_as_tuple] = None
         if player_as_tuple not in self.visitations:
             self.visitations[player_as_tuple] = 0
-        return
 
-    def countUp(self):
+    def countUp(self) -> None:
+        # TODO: change setup
         self.visitations[tuple(self.env.player)] += 1
-        return
+        pass
 
-    def setStartingPosition(self, pos):
-        self.env.setPosition(pos)
-
-    def generateSamplePaths(self):  # Roll out one sample path
+    def generateSamplePaths(self) -> None:  # Roll out one sample path
         self.__resetSamplePath()
         while not self.env.isTerminal():  # Sample path
+            self.__addToSamplePath()
             actions = [1, 2, 3, 4]
             for action in [1, 2, 3, 4]:  # check for valid actions
                 try:
@@ -67,21 +74,22 @@ class MonteCarloPolicyEvaluation:
                     actions.remove(action)
 
             if self.policy is None:
-                action_played = rnd.choice(actions)  # Uniform Sampling
+                action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
                 raise Exception("?")
             self.env.moveRestricted(action_played)
-            self.__addToSamplePath()
-        return
-
-    def updateRewards(self):
-        for key in self.rewardPath.keys():
-            self.rewardPath[key] = self.env.rolloutReward()
+        self.__addToSamplePath()
 
     def __resetSamplePath(self):
-        self.pathUntilTermination = [self.env.startingPoint]
+        self.pathUntilTermination = []
 
     def firstVisitPolicyEvalV(self):
         while not self.converged():
             self.generateSamplePaths()
-            self.updateRewards()
+            for t in range(len(self.pathUntilTermination)):
+                state = self.pathUntilTermination[t]
+                if state not in self.pathUntilTermination[0:t]:
+                    # Roll out rewards:
+
+
+

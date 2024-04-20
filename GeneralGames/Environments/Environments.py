@@ -15,7 +15,7 @@ class Gridworld:
         self.width = width
         self.height = height
         self.boundaries = [width, height]
-        self.player = None
+        self.player = [None, None]
         self.goal = [goal[0], goal[1]]
         self.cliff = []
         self.startingPoint = None
@@ -63,7 +63,7 @@ class Gridworld:
     def __up(self):
         self.player[1] += 1
         if self.isInBoundaries():
-            return
+            pass
         else:
             self.player[1] -= 1
             raise Exception
@@ -71,8 +71,7 @@ class Gridworld:
     def __down(self):
         self.player[1] -= 1
         if self.isInBoundaries():
-
-            return
+            pass
         else:
             self.player[1] += 1
             raise Exception
@@ -80,7 +79,7 @@ class Gridworld:
     def __left(self):
         self.player[0] -= 1
         if self.isInBoundaries():
-            return
+            pass
         else:
             self.player[0] += 1
             raise Exception
@@ -88,12 +87,12 @@ class Gridworld:
     def __right(self):
         self.player[0] += 1
         if self.isInBoundaries():
-            return
+            pass
         else:
             self.player[0] -= 1
             raise Exception
 
-    def moveRestricted(self, direction) -> None:
+    def moveRestricted(self, direction):
 
         moves = {
             1: self.__down,
@@ -104,7 +103,7 @@ class Gridworld:
 
         if direction not in moves:
             raise AssertionError("Step rollout failed")
-        return moves[direction]()
+        moves[direction]()
 
     def __upUnres(self):
         self.player[1] += 1
@@ -187,6 +186,7 @@ class Gridworld:
 
     def rolloutReward(self) -> float:
         # Rollout strictly for Gridworld reward profiles
+        # TODO: new!
         if self.isPositiveTerminal():
             return self.rewards[0]
         elif self.isNegativeTerminal():

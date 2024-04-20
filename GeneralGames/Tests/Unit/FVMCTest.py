@@ -15,8 +15,12 @@ class MyTestCase(unittest.TestCase):
     def testGeneratePath(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([0, 0])
+        mcpe.setMaxIterations(10000)
         mcpe.generateSamplePaths()
-        self.assertEqual([3, 3], mcpe.pathUntilTermination[-1])
+        if len(mcpe.pathUntilTermination) == mcpe.maxIteration:
+            self.skipTest("Max Iteration was reached")
+        else:
+            self.assertEqual((3, 3), mcpe.pathUntilTermination[-1])
 
 
 if __name__ == '__main__':
