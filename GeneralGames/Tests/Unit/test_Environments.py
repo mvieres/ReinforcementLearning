@@ -55,6 +55,17 @@ class TestGridWorld(unittest.TestCase):
         gridworld.setPosition([1, 1])
         self.assertEqual(True, gridworld.isTerminal())
 
+    def test_setRewads(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setRewards({(1, 1): 10})
+        self.assertEqual(10, gridworld.rewards[(1, 1)])
+
+    def test_rolloutReward(self):
+        gridworld = Gridworld(10, 10, [1, 1])
+        gridworld.setRewards({(1, 1): 10})
+        self.assertEqual(10, gridworld.rolloutReward([1, 1]))
+        self.assertEqual(0, gridworld.rolloutReward([1, 2]))
+
 
 if __name__ == '__main__':
     unittest.main()

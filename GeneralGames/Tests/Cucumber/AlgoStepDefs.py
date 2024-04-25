@@ -1,6 +1,6 @@
 from behave import given, then
 
-from GeneralGames.Algorithms.PolicyIteration import AlgoBase
+from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 
 
 class AlgoTest:
@@ -20,5 +20,5 @@ class AlgoTest:
 
     @then("greedy policy returns maximum value")
     def check_greedy(self):
-        greedy_action = AlgoBase.argmaxDict(self.q_value)
+        greedy_action = PolicyIteration.argmaxDict(self.q_value)
         assert greedy_action != [5, 1]

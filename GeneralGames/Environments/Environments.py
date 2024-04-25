@@ -40,10 +40,8 @@ class Gridworld:
     def setCliff(self, obsitcal):
         self.cliff.append(obsitcal)
 
-    def setRewards(self, rewardList) -> None:
-        assert len(rewardList) > 0
-        assert rewardList[1] < 0
-        self.rewards = rewardList
+    def setRewards(self, rewards: dict) -> None:
+        self.rewards = rewards
 
     def resetPlayerToStart(self) -> None:
         self.player = self.startingPoint
@@ -134,7 +132,6 @@ class Gridworld:
             raise AssertionError("Step rollout failed")
         return moves[direction]()
 
-
     def __upTest(self):
         self.player[1] += 1
         if self.isInBoundaries():
@@ -184,12 +181,9 @@ class Gridworld:
             raise AssertionError("Step rollout failed")
         return moves[direction]()
 
-    def rolloutReward(self) -> float:
+    def rolloutReward(self, state: list) -> float:
         # Rollout strictly for Gridworld reward profiles
-        # TODO: new!
-        if self.isPositiveTerminal():
-            return self.rewards[0]
-        elif self.isNegativeTerminal():
-            return self.rewards[1]
-        else:
-            return self.rewards[2]
+        try:
+            return self.rewards[tuple(state)]
+        except:
+            return 0

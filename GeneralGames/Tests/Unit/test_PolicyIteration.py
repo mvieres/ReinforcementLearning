@@ -1,6 +1,6 @@
 import unittest
 
-from GeneralGames.Algorithms.PolicyIteration import AlgoBase
+from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 
 
 class MyTestCase(unittest.TestCase):
@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
             (4, 0): 40,
             (5, 1): 50
         }
-        greedy_action = AlgoBase.argmaxDict(q_value)
+        greedy_action = PolicyIteration.argmaxDict(q_value)
         self.assertEqual((5, 1), greedy_action)
 
 
