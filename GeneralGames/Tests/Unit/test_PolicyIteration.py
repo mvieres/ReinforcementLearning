@@ -19,6 +19,15 @@ class MyTestCase(unittest.TestCase):
         greedy_action = PolicyIteration.argmaxDict(q_value)
         self.assertEqual((5, 1), greedy_action)
 
+    def test_listq(self):
+        q_dict = {
+            ((1, 1), 1): 10,
+            ((2, 2), 1): 10
+        }
+        keys = list(q_dict.keys())
+        print(keys[0][0])
+
+
 
 if __name__ == '__main__':
     unittest.main()

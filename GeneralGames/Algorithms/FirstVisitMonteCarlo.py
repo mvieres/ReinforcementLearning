@@ -7,7 +7,6 @@ import numpy.random as rnd
 class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
-        self.rewardPath = {}
         self.width = width
         self.height = height
         self.maxIteration = maxIteration
@@ -15,14 +14,21 @@ class MonteCarloPolicyEvaluation:
         self.initialDistribution = initialDistribution
         self.pathUntilTermination = []
         self.tol = tol
-        self.visitations = {}
+        self.visitationsForV = {}
+        self.visitationsForQ = {}
         self.env = Environments.Gridworld(width, height, goal)
         self.gamma = gamma
         self.valueApproximation = {}
         self.numberIterations = 0
+        self.qApproximation = {}  # intended layout: {(state, action): q_value} with state = (x, y) and action
+        self.actionsUntilTermination = []
+        self.actionPlayed = None
 
     def getValueApproximation(self) -> dict:
         return self.valueApproximation
+
+    def getQApproximation(self) -> dict:
+        return self.qApproximation
 
     def setMaxIterations(self, maxIterations: int) -> None:
         self.maxIteration = maxIterations
@@ -33,17 +39,20 @@ class MonteCarloPolicyEvaluation:
 
     def resetPath(self):
         self.env.resetPlayerToStart()
-        self.rewardPath = {}
-        self.visitations = {}
+        self.visitationsForV = {}
         self.pathUntilTermination = [self.env.startingPoint]
 
-    def setPolicy(self):
+    def setPolicy(self, policy: dict):
         # TODO: Mapping to use epsilon greedy etc.
         return
 
-    def __addToSamplePath(self):
+    def __addStateToSamplePath(self):
         self.pathUntilTermination.append(tuple(self.env.player))
-        return
+        pass
+
+    def __addActionsToSamplePath(self):
+        self.actionsUntilTermination.append(self.actionPlayed)
+        pass
 
     def compute_V_value(self):
 
@@ -71,36 +80,58 @@ class MonteCarloPolicyEvaluation:
         :return: None
         """
         try:
-            for state in self.pathUntilTermination:
+            for state in self.pathUntilTermination:  # Add states for Valueapprox
                 player_as_tuple = tuple(state)
-                if player_as_tuple not in self.valueApproximation:
-                    self.valueApproximation[player_as_tuple] = 0
-                if player_as_tuple not in self.visitations:
-                    self.visitations[player_as_tuple] = 0
-            pass
-        except:
-            Exception("pathUntilTermination is empty.")
+                self.valueApproximation.setdefault(player_as_tuple, 0)
+                self.visitationsForV.setdefault(player_as_tuple, 0)
 
-    def countUp(self, state: list) -> None:
+            state_action_pairs = [(tuple(self.pathUntilTermination[i]), self.actionsUntilTermination[i])
+                                  for i in range(len(self.pathUntilTermination) - 1)]
+            state_action_pairs.append((tuple(self.pathUntilTermination[-1]), None))  # Add last state with no action
+
+            for sap in state_action_pairs:  # Add state action pairs to qApproximation and visitationsForQ for Q Approx
+                self.qApproximation.setdefault(sap, 0)
+                self.visitationsForQ.setdefault(sap, 0)
+
+        except Exception as e:
+            print(f"Unknown error in addSamplePathToMetricDicts: {e}")
+            raise
+
+    def countUpState(self, state: list) -> None:
         """
         Counts up the visitation count for a given state.
         :param state: list
         :return: None
         """
         try:
-            self.visitations[tuple(state)] += 1
+            self.visitationsForV[tuple(state)] += 1
         except:
-            self.visitations[tuple(state)] = 1
+            self.visitationsForV[tuple(state)] = 1
+        pass
+
+    def countUpStateActionPair(self, state: list, action: int) -> None:
+        """
+        Counts up the visitation count for a given state action pair.
+        :param state: list
+        :param action: int
+        :return: None
+        """
+        try:
+            self.visitationsForQ[(tuple(state), action)] += 1
+        except:
+            self.visitationsForQ[(tuple(state), action)] = 1
         pass
 
     def generateSamplePaths(self) -> None:  # Roll out one sample path
         """
         Generate one sample path until termination (or until max iterations are reached).
+
+        IDEA: Use this function for q and v
         :return: None
         """
         self.__resetSamplePath()
         while not self.env.isTerminal():  # Sample path
-            self.__addToSamplePath()
+            self.__addStateToSamplePath()
             actions = [1, 2, 3, 4]
             for action in [1, 2, 3, 4]:  # check for valid actions
                 try:
@@ -112,8 +143,11 @@ class MonteCarloPolicyEvaluation:
                 action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
                 raise Exception("?")
+                # TODO: use epsilon greedy
             self.env.moveRestricted(action_played)
-        self.__addToSamplePath()
+            self.actionPlayed = action_played
+            self.__addActionsToSamplePath()
+        self.__addStateToSamplePath()
 
     def __resetSamplePath(self):
         self.pathUntilTermination = []
@@ -135,7 +169,7 @@ class MonteCarloPolicyEvaluation:
         Perform first visit monte carlo evaluation of given policy for value function.
         :return: None
         """
-
+        # Marked for removal
         self.numberIterations = 0
         v_old = {}
         v_new = {} # ?
@@ -149,10 +183,23 @@ class MonteCarloPolicyEvaluation:
                     # Roll out rewards:
                     state_as_tuple = tuple(state)
                     v = self.env.rolloutReward(state) + self.rolloutRewardtoSample(t)
-                    self.valueApproximation[state_as_tuple] = (v / (self.visitations[state_as_tuple] + 1)) + \
-                                                              (self.visitations[state_as_tuple] / (
-                                                                      self.visitations[state_as_tuple] + 1)) * \
+                    self.valueApproximation[state_as_tuple] = (v / (self.visitationsForV[state_as_tuple] + 1)) + \
+                                                              (self.visitationsForV[state_as_tuple] / (
+                                                                      self.visitationsForV[state_as_tuple] + 1)) * \
                                                               self.valueApproximation[state_as_tuple]
-                    self.countUp(state)
+                    self.countUpState(state)
             v_new = self.valueApproximation # ?
             self.numberIterations += 1
+
+    def firstVisitPolicyEvalQ(self) -> None:
+        """
+        Perform first visit monte carlo evaluation of given policy for action value function.
+        :return: None
+        """
+        self.numberIterations = 0
+        while not self.converged({}, {}):
+            self.generateSamplePaths()
+            self.addSamplePathToMetricDicts()
+            q_old = 0
+            for t in range(len(self.pathUntilTermination)):
+                pass
