@@ -29,10 +29,8 @@ class Gridworld:
     def setBoundaries(self, boundary) -> None:
         self.boundaries = boundary
 
-    def setStartingPoint(self, start) -> None:
-        assert isinstance(start, list)
-        self.player = [start[0], start[1]]
-        self.startingPoint = self.player
+    def setStartingPoint(self, start: list) -> None:
+        self.startingPoint = [start[0], start[1]]
 
     def getBoundaries(self) -> list:
         return self.boundaries
@@ -44,7 +42,7 @@ class Gridworld:
         self.rewards = rewards
 
     def resetPlayerToStart(self) -> None:
-        self.player = self.startingPoint
+        self.player = self.startingPoint.copy()
 
     def isInBoundaries(self) -> bool:
         return (0 <= self.player[0] <= self.boundaries[0]) and (0 <= self.player[1] <= self.boundaries[1])

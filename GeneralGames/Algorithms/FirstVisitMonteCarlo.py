@@ -7,6 +7,7 @@ import numpy.random as rnd
 class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
+
         self.width = width
         self.height = height
         self.maxIteration = maxIteration
@@ -23,6 +24,7 @@ class MonteCarloPolicyEvaluation:
         self.qApproximation = {}  # intended layout: {(state, action): q_value} with state = (x, y) and action
         self.actionsUntilTermination = []
         self.actionPlayed = None
+        self.stateActionPairs = None
 
     def getValueApproximation(self) -> dict:
         return self.valueApproximation
@@ -33,15 +35,6 @@ class MonteCarloPolicyEvaluation:
     def setMaxIterations(self, maxIterations: int) -> None:
         self.maxIteration = maxIterations
 
-    def setStartingPoint(self, start: list):
-        self.env.player = start
-        self.env.startingPoint = start
-
-    def resetPath(self):
-        self.env.resetPlayerToStart()
-        self.visitationsForV = {}
-        self.pathUntilTermination = [self.env.startingPoint]
-
     def setPolicy(self, policy: dict):
         # TODO: Mapping to use epsilon greedy etc.
         return
@@ -50,7 +43,7 @@ class MonteCarloPolicyEvaluation:
         self.pathUntilTermination.append(tuple(self.env.player))
         pass
 
-    def __addActionsToSamplePath(self):
+    def __addActionsToSamplePath(self) -> None:
         self.actionsUntilTermination.append(self.actionPlayed)
         pass
 
@@ -58,21 +51,18 @@ class MonteCarloPolicyEvaluation:
 
         pass
 
-    def converged(self, old: dict, new: dict) -> bool:
+    def converged(self, count) -> bool:
         """
         CONVERGENCE Criterium?
         :param old:
         :param new:
         :return:
         """
-        if old is None:
-            return False
-        elif len(old) < self.width * self.height:
+        # TODO: change to use of q / v approximations
+        if count < self.maxIteration:
             return False
         else:
-            for key in old.keys():
-                if np.abs(old[key] - new[key]) < self.tol: # ??????
-                    return True
+            return True
 
     def addSamplePathToMetricDicts(self) -> None:
         """
@@ -88,7 +78,7 @@ class MonteCarloPolicyEvaluation:
             state_action_pairs = [(tuple(self.pathUntilTermination[i]), self.actionsUntilTermination[i])
                                   for i in range(len(self.pathUntilTermination) - 1)]
             state_action_pairs.append((tuple(self.pathUntilTermination[-1]), None))  # Add last state with no action
-
+            self.stateActionPairs = state_action_pairs
             for sap in state_action_pairs:  # Add state action pairs to qApproximation and visitationsForQ for Q Approx
                 self.qApproximation.setdefault(sap, 0)
                 self.visitationsForQ.setdefault(sap, 0)
@@ -105,8 +95,9 @@ class MonteCarloPolicyEvaluation:
         """
         try:
             self.visitationsForV[tuple(state)] += 1
-        except:
-            self.visitationsForV[tuple(state)] = 1
+        except Exception as e:
+            print(f"state as tuple key not in dict in countUpState: {e}")
+            raise
         pass
 
     def countUpStateActionPair(self, state: list, action: int) -> None:
@@ -118,8 +109,9 @@ class MonteCarloPolicyEvaluation:
         """
         try:
             self.visitationsForQ[(tuple(state), action)] += 1
-        except:
-            self.visitationsForQ[(tuple(state), action)] = 1
+        except Exception as e:
+            print(f"state action as key not in dict in countUpStateActionPair: {e}")
+            raise
         pass
 
     def generateSamplePaths(self) -> None:  # Roll out one sample path
@@ -130,8 +122,9 @@ class MonteCarloPolicyEvaluation:
         :return: None
         """
         self.__resetSamplePath()
+        self.env.resetPlayerToStart()
+        self.__addStateToSamplePath()
         while not self.env.isTerminal():  # Sample path
-            self.__addStateToSamplePath()
             actions = [1, 2, 3, 4]
             for action in [1, 2, 3, 4]:  # check for valid actions
                 try:
@@ -147,12 +140,16 @@ class MonteCarloPolicyEvaluation:
             self.env.moveRestricted(action_played)
             self.actionPlayed = action_played
             self.__addActionsToSamplePath()
-        self.__addStateToSamplePath()
+            self.__addStateToSamplePath()
 
     def __resetSamplePath(self):
         self.pathUntilTermination = []
+        self.actionsUntilTermination = []
 
-    def rolloutRewardtoSample(self, timeIndex: int) -> float:
+    def setStartingPoint(self, startingPoint: list) -> None:
+        self.env.setStartingPoint(startingPoint)
+
+    def rolloutRewardtoSampleV(self, timeIndex: int) -> float:
         """
         Roll out reward for given time index from given timepoint using discount factor gamma.
         :param timeIndex: int
@@ -164,6 +161,19 @@ class MonteCarloPolicyEvaluation:
             reward += self.gamma ** (t - timeIndex) * self.env.rolloutReward(state)
         return reward
 
+    def rolloutRewardToSampleQ(self, timeIndex: int) -> float:
+        """
+        Roll out reward for given time index from given timepoint using discount factor gamma.
+        Attention: reward does not depend on action, hence rollout does not consider action played
+        :param timeIndex: int
+        :return: float
+        """
+        reward = 0
+        for t in range(timeIndex + 1, len(self.stateActionPairs)):
+            state = self.stateActionPairs[t][0]
+            reward += self.gamma ** (t - timeIndex) * self.env.rolloutReward(state)
+        return reward
+
     def firstVisitPolicyEvalV(self) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for value function.
@@ -172,23 +182,23 @@ class MonteCarloPolicyEvaluation:
         # Marked for removal
         self.numberIterations = 0
         v_old = {}
-        v_new = {} # ?
-        while not self.converged(v_old, v_new):
+        v_new = {}  # ?
+        while not self.converged(self.numberIterations):
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
-            v_old = self.valueApproximation # ?
+            v_old = self.valueApproximation  # ?
             for t in range(len(self.pathUntilTermination)):
                 state = self.pathUntilTermination[t]
                 if state not in self.pathUntilTermination[0:t]:
                     # Roll out rewards:
                     state_as_tuple = tuple(state)
-                    v = self.env.rolloutReward(state) + self.rolloutRewardtoSample(t)
+                    v = self.env.rolloutReward(state) + self.rolloutRewardtoSampleV(t)
                     self.valueApproximation[state_as_tuple] = (v / (self.visitationsForV[state_as_tuple] + 1)) + \
                                                               (self.visitationsForV[state_as_tuple] / (
                                                                       self.visitationsForV[state_as_tuple] + 1)) * \
                                                               self.valueApproximation[state_as_tuple]
                     self.countUpState(state)
-            v_new = self.valueApproximation # ?
+            v_new = self.valueApproximation  # ?
             self.numberIterations += 1
 
     def firstVisitPolicyEvalQ(self) -> None:
@@ -197,9 +207,16 @@ class MonteCarloPolicyEvaluation:
         :return: None
         """
         self.numberIterations = 0
-        while not self.converged({}, {}):
+        while not self.converged(self.numberIterations):
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
             q_old = 0
-            for t in range(len(self.pathUntilTermination)):
-                pass
+            for t in range(len(self.stateActionPairs)):
+                sap = self.stateActionPairs[t]
+                if sap not in self.stateActionPairs[0:t]:
+                    q = self.env.rolloutReward(sap[0]) + self.rolloutRewardtoSampleV(t)
+                    self.qApproximation[sap] = (q / (self.visitationsForQ[sap] + 1)) + \
+                                               (self.visitationsForQ[sap] / (self.visitationsForQ[sap] + 1)) * \
+                                               self.qApproximation[sap]
+                    self.countUpStateActionPair(sap[0], sap[1])
+            self.numberIterations += 1

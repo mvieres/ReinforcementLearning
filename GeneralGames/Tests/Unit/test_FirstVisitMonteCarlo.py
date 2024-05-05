@@ -27,21 +27,26 @@ class MyTestCase(unittest.TestCase):
     def testGeneratePath(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([0, 0])
-        mcpe.setMaxIterations(10000)
+        mcpe.setMaxIterations(1000)
         mcpe.generateSamplePaths()
         if len(mcpe.pathUntilTermination) == mcpe.maxIteration:
             self.skipTest("Max Iteration was reached")
         else:
             self.assertEqual((3, 3), mcpe.pathUntilTermination[-1])
+            self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
             self.assertEqual(len(mcpe.pathUntilTermination)-1, len(mcpe.actionsUntilTermination))
+            mcpe.generateSamplePaths()  # Check if pathrollout is valide at the second time
+            self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
 
     def testFirstVisitMonteCarloValueApprox(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
         mcpe.setMaxIterations(1000)
-        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.env.setRewards({(3, 3): 10, (2, 2): -10})
         mcpe.firstVisitPolicyEvalV()
-        self.assertEqual(10, mcpe.valueApproximation[(3, 3)])
+        self.assertTrue(10-0.01 <= mcpe.valueApproximation[(3, 3)] <= 10+0.01)
+        #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01) # TODO: Check this test if cliff point should have value approx of -10
 
 
 if __name__ == '__main__':
