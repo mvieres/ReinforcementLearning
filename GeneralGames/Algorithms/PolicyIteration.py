@@ -7,14 +7,17 @@ class PolicyIteration:
         pass
 
     @staticmethod
-    def argmaxDict(d):
-        max_key = None
-        max_value = float('-inf')  # Initializing with negative infinity to handle negative values
-        for key, value in d.items():
-            if value > max_value:
-                max_key = key
-                max_value = value
-        return max_key
+    def argmaxDict(d: dict) -> dict:
+        """
+        Return a dict with the best action for a given state
+        :param d:
+        :return:
+        """
+        for state in dict.keys():
+
+
+        # TODO: Implement this
+        pass
 
     def greedy(self, q_values: dict):
         return self.argmaxDict(q_values)
