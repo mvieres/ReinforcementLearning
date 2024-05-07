@@ -13,8 +13,6 @@ class PolicyIteration:
         :param d:
         :return:
         """
-        for state in dict.keys():
-
 
         # TODO: Implement this
         pass

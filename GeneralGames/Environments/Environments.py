@@ -11,13 +11,13 @@ class DirectionsGridWorld(Enum):
 class Gridworld:
 
     def __init__(self, width, height, goal):
-        self.rewards = {}
+        self.__rewards = {}
         self.width = width
         self.height = height
         self.boundaries = [width, height]
         self.player = [None, None]
-        self.goal = [goal[0], goal[1]]
-        self.cliff = []
+        self.__goal = [goal[0], goal[1]]
+        self.__cliff = []
         self.startingPoint = None
 
     def getPosition(self) -> list:
@@ -31,15 +31,20 @@ class Gridworld:
 
     def setStartingPoint(self, start: list) -> None:
         self.startingPoint = [start[0], start[1]]
+        self.player = self.startingPoint.copy()
 
     def getBoundaries(self) -> list:
         return self.boundaries
 
-    def setCliff(self, obsitcal):
-        self.cliff.append(obsitcal)
+    def setCliff(self, cliff: list) -> None:
+        for cliff_vector in cliff:
+            self.__cliff.append(cliff_vector)
+
+    def getCliff(self) -> list:
+        return self.__cliff
 
     def setRewards(self, rewards: dict) -> None:
-        self.rewards = rewards
+        self.__rewards = rewards
 
     def resetPlayerToStart(self) -> None:
         self.player = self.startingPoint.copy()
@@ -48,10 +53,10 @@ class Gridworld:
         return (0 <= self.player[0] <= self.boundaries[0]) and (0 <= self.player[1] <= self.boundaries[1])
 
     def isPositiveTerminal(self) -> bool:
-        return self.player == self.goal
+        return self.player == self.__goal
 
     def isNegativeTerminal(self) -> bool:
-        return any(all(item in sublist for item in self.player) for sublist in self.cliff)
+        return any(all(item in sublist for item in self.player) for sublist in self.__cliff)
 
     def isTerminal(self):
         return self.isPositiveTerminal() or self.isNegativeTerminal()
@@ -182,6 +187,6 @@ class Gridworld:
     def rolloutReward(self, state: list) -> float:
         # Rollout strictly for Gridworld reward profiles
         try:
-            return self.rewards[tuple(state)]
+            return self.__rewards[tuple(state)]
         except:
             return 0

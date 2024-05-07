@@ -14,7 +14,7 @@ class TestGridworldDirections(unittest.TestCase):
 
 class TestGridWorld(unittest.TestCase):
 
-    def test_Momvement(self):
+    def test_movement(self):
         gridworld = Gridworld(10, 10, [3, 3])
         gridworld.setStartingPoint([0, 0])
         gridworld.moveRestricted(4)
@@ -32,18 +32,16 @@ class TestGridWorld(unittest.TestCase):
         result = gridworld.isPositiveTerminal()
         self.assertEqual(True, result)
 
-    def test_cliff(self):
+    def test_setCliff(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setStartingPoint([1, 1])
-        gridworld.setCliff([1, 1])
-        self.assertEqual(True, gridworld.isNegativeTerminal())
-        gridworld.setCliff([2, 2])
-        gridworld.player = [2, 2]
-        self.assertEqual(True, gridworld.isNegativeTerminal())
+        cliff = [[1, 1], [1, 2], [1, 3]];
+        gridworld.setCliff(cliff)
+        self.assertEqual(cliff, gridworld.__cliff)
 
     def test_isinboundaries(self):
         gridworld = Gridworld(10, 10, [3, 3])
-        gridworld.player = [-1, 0]
+        gridworld.__player = [-1, 0]
         self.assertEqual(False, gridworld.isInBoundaries())
 
     def test_setObstical(self):
@@ -58,7 +56,7 @@ class TestGridWorld(unittest.TestCase):
     def test_setRewads(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setRewards({(1, 1): 10})
-        self.assertEqual(10, gridworld.rewards[(1, 1)])
+        self.assertEqual(10, gridworld.__rewards[(1, 1)])
 
     def test_rolloutReward(self):
         gridworld = Gridworld(10, 10, [1, 1])

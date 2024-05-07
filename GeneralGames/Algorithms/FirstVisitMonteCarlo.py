@@ -40,7 +40,7 @@ class MonteCarloPolicyEvaluation:
         return
 
     def __addStateToSamplePath(self):
-        self.pathUntilTermination.append(tuple(self.env.player))
+        self.pathUntilTermination.append(tuple(self.env.__player))
         pass
 
     def __addActionsToSamplePath(self) -> None:
