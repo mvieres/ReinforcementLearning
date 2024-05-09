@@ -1,29 +1,33 @@
 import random as rand
+import numpy as np
 
 
 class PolicyIteration:
 
-    def __int__(self):
+    def __init__(self):
         pass
 
-    @staticmethod
-    def argmaxDict(d: dict) -> dict:
+    def transformQValuesDict(self, d: dict) -> dict:
         """
-        Return a dict with the best action for a given state
+
         :param d:
-        :return:
+        :return: dict with key: state, values: list with [(action1, rewards), (action2, reward),...]
         """
+        keys = list(d.keys())
+        return_dict = {}
+        for i in range(len(keys)):
+            state = keys[i][0]
+            action = keys[i][1]
+            if state not in list(return_dict.keys()):
+                return_dict[state] = [(action, d[(state, action)])]
+            else:
+                return_dict[state].append((action, d[(state, action)]))
+        return return_dict
 
-        # TODO: Implement this
-        pass
-
-    def greedy(self, q_values: dict):
-        return self.argmaxDict(q_values)
-
-    def epsilonGreedy(self, q_values: dict, epsilon: float):
-        if rand.uniform(0, 1) > epsilon:
-            return self.argmaxDict(q_values)
-        else:
-            return
-
-
+    def greedy(self, d: dict):
+        transformed_dict = self.transformQValuesDict(d)
+        res = {}
+        for state in list(transformed_dict.keys()):
+            b = transformed_dict[state]
+            res[state] = b[np.argmax([b[_][1] for _ in range(len(b))])][0]
+        return res

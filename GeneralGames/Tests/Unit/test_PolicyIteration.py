@@ -9,15 +9,20 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def test_greedy(self):
-        q_value = {
-            (0, 0): 10,
-            (1, 0): 20,
-            (3, 0): 30,
-            (4, 0): 40,
-            (5, 1): 50
+        d = {
+            ((1, 1), 2): 10,
+            ((1, 2), 1): 20,
+            ((2, 2), 3): 30,
+            ((1, 1), 1): 40,
+            ((2, 2), 2): 50,
+            ((2, 2), 4): 60,
         }
-        greedy_action = PolicyIteration.argmaxDict(q_value)
-        self.assertEqual((5, 1), greedy_action)
+        supposed_output = {
+            (1, 1): 1,
+            (1, 2): 1,
+            (2, 2): 4
+        }
+        self.assertEqual(PolicyIteration().greedy(d), supposed_output)
 
     def test_listq(self):
         q_dict = {
@@ -27,6 +32,21 @@ class MyTestCase(unittest.TestCase):
         keys = list(q_dict.keys())
         print(keys[0][0])
 
+    def test_argMaxDict(self):
+        d = {
+            ((1, 1), 2): 10,
+            ((1, 2), 1): 20,
+            ((2, 2), 3): 30,
+            ((1, 1), 1): 40,
+            ((2, 2), 2): 50,
+            ((2, 2), 4): 60,
+        }
+        supposed_output = {
+            (1, 1): [(2, 10), (1, 40)],
+            (1, 2): [(1, 20)],
+            (2, 2): [(3, 30), (2, 50), (4, 60)]
+        }
+        self.assertEqual(supposed_output, PolicyIteration.transformQValuesDict(d))
 
 
 if __name__ == '__main__':

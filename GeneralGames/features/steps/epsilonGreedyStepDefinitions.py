@@ -9,5 +9,5 @@ def set_q_values(context):
 
 @then("greedy policy returns maximum value")
 def check_greedy(context):
-    greedy_action = PolicyIteration.argmaxDict(context.q_value)
+    greedy_action = PolicyIteration.__transformQValuesDict(context.q_value)
     assert greedy_action != [5, 1]

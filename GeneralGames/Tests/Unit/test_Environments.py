@@ -1,4 +1,7 @@
 import unittest
+
+import numpy as np
+
 from GeneralGames.Environments.Environments import Gridworld
 from GeneralGames.Environments.Environments import DirectionsGridWorld as DGW
 
@@ -35,13 +38,13 @@ class TestGridWorld(unittest.TestCase):
     def test_setCliff(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setStartingPoint([1, 1])
-        cliff = [[1, 1], [1, 2], [1, 3]];
+        cliff = [[1, 1], [1, 2], [1, 3]]
         gridworld.setCliff(cliff)
-        self.assertEqual(cliff, gridworld.__cliff)
+        self.assertEqual(cliff, gridworld.getCliff())
 
     def test_isinboundaries(self):
         gridworld = Gridworld(10, 10, [3, 3])
-        gridworld.__player = [-1, 0]
+        gridworld.setPosition([-1, 0])
         self.assertEqual(False, gridworld.isInBoundaries())
 
     def test_setObstical(self):
@@ -56,13 +59,28 @@ class TestGridWorld(unittest.TestCase):
     def test_setRewads(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setRewards({(1, 1): 10})
-        self.assertEqual(10, gridworld.__rewards[(1, 1)])
+        self.assertEqual(10, gridworld.getRewards()[(1, 1)])
 
     def test_rolloutReward(self):
         gridworld = Gridworld(10, 10, [1, 1])
         gridworld.setRewards({(1, 1): 10})
         self.assertEqual(10, gridworld.rolloutReward([1, 1]))
         self.assertEqual(0, gridworld.rolloutReward([1, 2]))
+
+    def testDicts(self):
+        dict = {((1, 1), 1): 10, ((2, 2), 1): 4}
+        a = list(dict.keys())
+        b = a[0]
+
+    def testMoreDict(self):
+        d ={
+            (1, 1): [(2, 10), (1, 40)],
+            (1, 2): [(1, 20)],
+            (2, 2): [(3, 30), (2, 50), (4, 60)]
+        }
+        b = d[(1, 1)]
+        a = [b[_][1] for _ in range(len(b))]
+        c = b[np.argmax(a)][0]
 
 
 if __name__ == '__main__':

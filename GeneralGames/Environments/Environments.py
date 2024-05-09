@@ -15,23 +15,23 @@ class Gridworld:
         self.width = width
         self.height = height
         self.boundaries = [width, height]
-        self.player = [None, None]
+        self.__player = [None, None]
         self.__goal = [goal[0], goal[1]]
         self.__cliff = []
-        self.startingPoint = None
+        self.__startingPoint = None
 
     def getPosition(self) -> list:
-        return self.player
+        return self.__player
 
     def setPosition(self, pos) -> None:
-        self.player = pos
+        self.__player = pos
 
     def setBoundaries(self, boundary) -> None:
         self.boundaries = boundary
 
     def setStartingPoint(self, start: list) -> None:
-        self.startingPoint = [start[0], start[1]]
-        self.player = self.startingPoint.copy()
+        self.__startingPoint = [start[0], start[1]]
+        self.__player = self.__startingPoint.copy()
 
     def getBoundaries(self) -> list:
         return self.boundaries
@@ -46,51 +46,54 @@ class Gridworld:
     def setRewards(self, rewards: dict) -> None:
         self.__rewards = rewards
 
+    def getRewards(self) -> dict:
+        return self.__rewards
+
     def resetPlayerToStart(self) -> None:
-        self.player = self.startingPoint.copy()
+        self.__player = self.__startingPoint.copy()
 
     def isInBoundaries(self) -> bool:
-        return (0 <= self.player[0] <= self.boundaries[0]) and (0 <= self.player[1] <= self.boundaries[1])
+        return (0 <= self.__player[0] <= self.boundaries[0]) and (0 <= self.__player[1] <= self.boundaries[1])
 
     def isPositiveTerminal(self) -> bool:
-        return self.player == self.__goal
+        return self.__player == self.__goal
 
     def isNegativeTerminal(self) -> bool:
-        return any(all(item in sublist for item in self.player) for sublist in self.__cliff)
+        return any(all(item in sublist for item in self.__player) for sublist in self.__cliff)
 
     def isTerminal(self):
         return self.isPositiveTerminal() or self.isNegativeTerminal()
 
     def __up(self):
-        self.player[1] += 1
+        self.__player[1] += 1
         if self.isInBoundaries():
             pass
         else:
-            self.player[1] -= 1
+            self.__player[1] -= 1
             raise Exception
 
     def __down(self):
-        self.player[1] -= 1
+        self.__player[1] -= 1
         if self.isInBoundaries():
             pass
         else:
-            self.player[1] += 1
+            self.__player[1] += 1
             raise Exception
 
     def __left(self):
-        self.player[0] -= 1
+        self.__player[0] -= 1
         if self.isInBoundaries():
             pass
         else:
-            self.player[0] += 1
+            self.__player[0] += 1
             raise Exception
 
     def __right(self):
-        self.player[0] += 1
+        self.__player[0] += 1
         if self.isInBoundaries():
             pass
         else:
-            self.player[0] -= 1
+            self.__player[0] -= 1
             raise Exception
 
     def moveRestricted(self, direction):
@@ -107,19 +110,19 @@ class Gridworld:
         moves[direction]()
 
     def __upUnres(self):
-        self.player[1] += 1
+        self.__player[1] += 1
         return
 
     def __downUnres(self):
-        self.player[1] -= 1
+        self.__player[1] -= 1
         return
 
     def __leftUnres(self):
-        self.player[0] -= 1
+        self.__player[0] -= 1
         return
 
     def __rightUnres(self):
-        self.player[0] += 1
+        self.__player[0] += 1
         return
 
     def move(self, direction) -> None:
@@ -136,39 +139,39 @@ class Gridworld:
         return moves[direction]()
 
     def __upTest(self):
-        self.player[1] += 1
+        self.__player[1] += 1
         if self.isInBoundaries():
-            self.player[1] -= 1
+            self.__player[1] -= 1
             return
         else:
-            self.player[1] -= 1
+            self.__player[1] -= 1
             raise Exception
 
     def __downTest(self):
-        self.player[1] -= 1
+        self.__player[1] -= 1
         if self.isInBoundaries():
-            self.player[1] += 1
+            self.__player[1] += 1
             return
         else:
-            self.player[1] += 1
+            self.__player[1] += 1
             raise Exception
 
     def __leftTest(self):
-        self.player[0] -= 1
+        self.__player[0] -= 1
         if self.isInBoundaries():
-            self.player[0] += 1
+            self.__player[0] += 1
             return
         else:
-            self.player[0] += 1
+            self.__player[0] += 1
             raise Exception
 
     def __rightTest(self):
-        self.player[0] += 1
+        self.__player[0] += 1
         if self.isInBoundaries():
-            self.player[0] -= 1
+            self.__player[0] -= 1
             return
         else:
-            self.player[0] -= 1
+            self.__player[0] -= 1
             raise Exception
 
     def moveTest(self, direction) -> None:

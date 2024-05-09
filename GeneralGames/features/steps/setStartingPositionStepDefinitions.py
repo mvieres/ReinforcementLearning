@@ -19,4 +19,4 @@ def generateSamplePath(context):
 
 @then(u'startingpoisiton is not changed')
 def checkPosition(context):
-    assert context.mcpe.env.startingPoint == [1, 1]
+    assert context.mcpe.env.__startingPoint == [1, 1]
