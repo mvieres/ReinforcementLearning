@@ -51,16 +51,25 @@ class MyTestCase(unittest.TestCase):
         #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01) # TODO: Check this test if cliff point should have value approx of -10
 
     def testFirstVisitMonteCarloQApprox(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=20000)
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.setMaxIterations(10000)
         mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
-        mcpe.setMaxIterations(1000)
         mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
         mcpe.firstVisitPolicyEvalQ()  # Test Q Value Approx
         self.assertEqual(1, 1)
         a = PolicyIteration().greedy(mcpe.qApproximation)
         self.assertEqual(1, 1)
         
+    def testFirstVisitMonteCarloImprovement(self):
+        # TODO: Fix this test, since optimal_policy should be a dict!!!!
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
+        mcpe.firstVisitMonteCarloIteration()
+        optimal_policy = mcpe.getOptimalPolicy()
+        self.assertEqual(optimal_policy[(3, 2)], 3)
+
 
 if __name__ == '__main__':
     unittest.main()
