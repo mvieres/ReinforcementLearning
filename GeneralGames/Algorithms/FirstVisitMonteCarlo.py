@@ -26,6 +26,8 @@ class MonteCarloPolicyEvaluation:
         self.actionsUntilTermination = []
         self.actionPlayed = None
         self.stateActionPairs = None
+        self.__epsilon = None
+        self.policyIteration = PolicyIteration.PolicyIteration()
 
     def getValueApproximation(self) -> dict:
         return self.valueApproximation
@@ -36,9 +38,21 @@ class MonteCarloPolicyEvaluation:
     def setMaxIterations(self, maxIterations: int) -> None:
         self.maxIteration = maxIterations
 
-    def setPolicy(self, policy: dict):
-        # TODO: Mapping to use epsilon greedy etc.
-        return
+    def setPolicy(self, policy: str, epsilon = 0.1) -> None:
+        self.policy = policy
+        self.__epsilon = epsilon
+
+    def __improvePolicy(self):
+        policy_methods = {
+            None: lambda: rnd.choice([1, 2, 3, 4]),
+            "greedy": lambda: self.policyIteration.greedy(self.qApproximation),
+            "epsilonGreedy": lambda: self.policyIteration.epsilonGreedy(self.qApproximation, self.__epsilon)
+        }
+
+        try:
+            return policy_methods[self.policy]()
+        except KeyError:
+            raise Exception(f"Policy {self.policy} not known")
 
     def __addStateToSamplePath(self):
         self.pathUntilTermination.append(tuple(self.env.getPosition()))
@@ -52,7 +66,7 @@ class MonteCarloPolicyEvaluation:
 
         pass
 
-    def converged(self, count) -> bool:
+    def pathConverged(self, count) -> bool:
         """
         CONVERGENCE Criterium?
         :param old:
@@ -60,6 +74,19 @@ class MonteCarloPolicyEvaluation:
         :return:
         """
         # TODO: change to use of q / v approximations
+        if count < self.maxIteration:
+            return False
+        else:
+            return True
+
+    def policyConverged(self, count) -> bool:
+        """
+        CONVERGENCE Criterium?
+        :param old:
+        :param new:
+        :return:
+        """
+        # TODO: implement right convergence criterium
         if count < self.maxIteration:
             return False
         else:
@@ -136,8 +163,8 @@ class MonteCarloPolicyEvaluation:
             if self.policy is None:
                 action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
-                raise Exception("?")
-                # TODO: use epsilon greedy
+                assert isinstance(self.policy, dict)  # self.policy has to be a dict here!
+                action_played = self.policy[tuple(self.env.getPosition())] if actions else None  # TODO: Check this line
             self.env.moveRestricted(action_played)
             self.actionPlayed = action_played
             self.__addActionsToSamplePath()
@@ -184,7 +211,7 @@ class MonteCarloPolicyEvaluation:
         self.numberIterations = 0
         v_old = {}
         v_new = {}  # ?
-        while not self.converged(self.numberIterations):
+        while not self.pathConverged(self.numberIterations):
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
             v_old = self.valueApproximation  # ?
@@ -202,13 +229,13 @@ class MonteCarloPolicyEvaluation:
             v_new = self.valueApproximation  # ?
             self.numberIterations += 1
 
-    def firstVisitPolicyEvalQ(self) -> None:
+    def firstVisitPolicyEvalQ(self, policy = None) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for action value function.
         :return: None
         """
         self.numberIterations = 0
-        while not self.converged(self.numberIterations):
+        while not self.pathConverged(self.numberIterations):
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
             q_old = 0
@@ -222,5 +249,16 @@ class MonteCarloPolicyEvaluation:
                     self.countUpStateActionPair(sap[0], sap[1])
             self.numberIterations += 1
 
-        def getGreedyPolicy() -> dict:
-            return PolicyIteration().greedy(self.qApproximation)
+    def firstVisitMonteCarloIteration(self) -> None:
+        """
+        Perform first visit monte carlo iteration for Q value.
+        :return: None
+        """
+        self.numberIterations = 0
+        while not self.policyConverged(self.numberIterations):
+            self.firstVisitPolicyEvalQ()
+            self.policy = self.__improvePolicy()
+            self.numberIterations += 1
+
+    def getOptimalPolicy(self) -> dict:
+        return self.policy
