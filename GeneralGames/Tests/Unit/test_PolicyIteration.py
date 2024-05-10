@@ -46,7 +46,7 @@ class MyTestCase(unittest.TestCase):
             (1, 2): [(1, 20)],
             (2, 2): [(3, 30), (2, 50), (4, 60)]
         }
-        self.assertEqual(supposed_output, PolicyIteration.transformQValuesDict(d))
+        self.assertEqual(supposed_output, PolicyIteration().transformQValuesDict(d))
 
 
 if __name__ == '__main__':

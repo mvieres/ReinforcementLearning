@@ -1,6 +1,7 @@
 import numpy as np
 
 from ..Environments import Environments
+from ..Algorithms import PolicyIteration
 import numpy.random as rnd
 
 
@@ -40,7 +41,7 @@ class MonteCarloPolicyEvaluation:
         return
 
     def __addStateToSamplePath(self):
-        self.pathUntilTermination.append(tuple(self.env.__player))
+        self.pathUntilTermination.append(tuple(self.env.getPosition()))
         pass
 
     def __addActionsToSamplePath(self) -> None:
@@ -220,3 +221,6 @@ class MonteCarloPolicyEvaluation:
                                                self.qApproximation[sap]
                     self.countUpStateActionPair(sap[0], sap[1])
             self.numberIterations += 1
+
+        def getGreedyPolicy() -> dict:
+            return PolicyIteration().greedy(self.qApproximation)
