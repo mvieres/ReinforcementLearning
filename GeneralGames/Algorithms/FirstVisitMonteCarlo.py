@@ -9,10 +9,11 @@ class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
 
+        self.__currentPolicy = None
         self.width = width
         self.height = height
         self.maxIteration = maxIteration
-        self.policy = None
+        self.__policyType = None
         self.initialDistribution = initialDistribution
         self.pathUntilTermination = []
         self.tol = tol
@@ -39,10 +40,10 @@ class MonteCarloPolicyEvaluation:
         self.maxIteration = maxIterations
 
     def setPolicy(self, policy: str, epsilon = 0.1) -> None:
-        self.policy = policy
+        self.__policyType = policy
         self.__epsilon = epsilon
 
-    def __improvePolicy(self):
+    def __policyWrapper(self):
         policy_methods = {
             None: lambda: rnd.choice([1, 2, 3, 4]),
             "greedy": lambda: self.policyIteration.greedy(self.qApproximation),
@@ -50,9 +51,9 @@ class MonteCarloPolicyEvaluation:
         }
 
         try:
-            return policy_methods[self.policy]()
+            return policy_methods[self.__policyType]()
         except KeyError:
-            raise Exception(f"Policy {self.policy} not known")
+            raise Exception(f"Policy {self.__policyType} not known")
 
     def __addStateToSamplePath(self):
         self.pathUntilTermination.append(tuple(self.env.getPosition()))
@@ -160,11 +161,14 @@ class MonteCarloPolicyEvaluation:
                 except:
                     actions.remove(action)
 
-            if self.policy is None:
+            if self.__currentPolicy is None:
                 action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
-                assert isinstance(self.policy, dict)  # self.policy has to be a dict here!
-                action_played = self.policy[tuple(self.env.getPosition())] if actions else None  # TODO: Check this line
+                assert isinstance(self.__currentPolicy, dict)  # self.policy has to be a dict here!
+                try:
+                    action_played = self.__currentPolicy[tuple(self.env.getPosition())] if actions else None
+                except:
+                    action_played = rnd.choice(actions) if actions else None  # Fallback for
             self.env.moveRestricted(action_played)
             self.actionPlayed = action_played
             self.__addActionsToSamplePath()
@@ -207,7 +211,6 @@ class MonteCarloPolicyEvaluation:
         Perform first visit monte carlo evaluation of given policy for value function.
         :return: None
         """
-        # Marked for removal
         self.numberIterations = 0
         v_old = {}
         v_new = {}  # ?
@@ -229,7 +232,7 @@ class MonteCarloPolicyEvaluation:
             v_new = self.valueApproximation  # ?
             self.numberIterations += 1
 
-    def firstVisitPolicyEvalQ(self, policy = None) -> None:
+    def firstVisitPolicyEvalQ(self) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for action value function.
         :return: None
@@ -257,8 +260,12 @@ class MonteCarloPolicyEvaluation:
         self.numberIterations = 0
         while not self.policyConverged(self.numberIterations):
             self.firstVisitPolicyEvalQ()
-            self.policy = self.__improvePolicy()
+            self.performPolicyIterationStep()
             self.numberIterations += 1
 
-    def getOptimalPolicy(self) -> dict:
-        return self.policy
+    def getCurrentPolicy(self) -> dict:
+        return self.__currentPolicy
+
+    def performPolicyIterationStep(self) -> None:
+        self.__currentPolicy = self.__policyWrapper().copy()
+        pass
