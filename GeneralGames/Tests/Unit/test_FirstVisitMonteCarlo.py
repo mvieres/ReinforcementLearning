@@ -60,15 +60,36 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(1, 1)
         a = PolicyIteration().greedy(mcpe.qApproximation)
         self.assertEqual(1, 1)
-        
+
+    def testPolicyIteration(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.setMaxIterations(10000)
+        mcpe.setPolicy("greedy")
+        mcpe.env.setCliff([(1, 1)])
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
+        mcpe.firstVisitPolicyEvalQ()
+        mcpe.performPolicyIterationStep()
+        new_policy = mcpe.getCurrentPolicy()
+        self.assertIsInstance(new_policy, dict)
+
     def testFirstVisitMonteCarloImprovement(self):
         # TODO: Fix this test, since optimal_policy should be a dict!!!!
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([0, 0])
-        mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
+        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.setPolicy("greedy")
         mcpe.firstVisitMonteCarloIteration()
-        optimal_policy = mcpe.getOptimalPolicy()
+        optimal_policy = mcpe.getCurrentPolicy()
         self.assertEqual(optimal_policy[(3, 2)], 3)
+
+    def testFirstVisitMonteCarloImprovementBestPolicy(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.firstVisitMonteCarloIteration()
+        self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # TODO: Observed wrong policy, check state - action pairs
 
 
 if __name__ == '__main__':
