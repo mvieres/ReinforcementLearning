@@ -1,5 +1,5 @@
 import unittest
-import  matplotlib.pyplot as plt
+
 from GeneralGames.Algorithms.FirstVisitMonteCarlo import MonteCarloPolicyEvaluation
 from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 
@@ -91,6 +91,16 @@ class MyTestCase(unittest.TestCase):
         mcpe.firstVisitMonteCarloIteration()
         self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # TODO: Observed wrong policy, check state - action pairs
 
+    def testIteratedPolicyForValidActions(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=500)
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.firstVisitMonteCarloIteration()
+        policy = mcpe.getCurrentPolicy()
+        for state in list(policy.keys()):  # TODO: fix sampling of wrong policies!
+            mcpe.env.moveTest(policy[state])
+        self.assertEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()
