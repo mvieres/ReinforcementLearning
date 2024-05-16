@@ -9,6 +9,7 @@ class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
 
+        self.__percentage = 90
         self.__currentPolicy = None
         self.width = width
         self.height = height
@@ -29,6 +30,7 @@ class MonteCarloPolicyEvaluation:
         self.stateActionPairs = None
         self.__epsilon = None
         self.policyIteration = PolicyIteration.PolicyIteration()
+        self.__watchPolicy = False
 
     def getValueApproximation(self) -> dict:
         return self.valueApproximation
@@ -36,14 +38,40 @@ class MonteCarloPolicyEvaluation:
     def getQApproximation(self) -> dict:
         return self.qApproximation
 
+    def setPercentageForConvergenceCriterion(self, percentage: float) -> None:
+        """
+        Default is: 90% of state-action pairs have to be below the tolerance value.
+        :param percentage: float 1 - 100
+        :return: None
+        """
+        self.__percentage = percentage
+
+    def setWatchPolicyDuringIteration(self, watch: bool) -> None:
+        """
+        Set boolean flag if policy should be validated during iteration. (for debugging purpose)
+        :param watch:
+        :return:
+        """
+        self.__watchPolicy = watch
+
     def setMaxIterations(self, maxIterations: int) -> None:
         self.maxIteration = maxIterations
 
-    def setPolicy(self, policy: str, epsilon = 0.1) -> None:
+    def setPolicy(self, policy: str, epsilon=0.1) -> None:
+        """
+        Choose policy type to be used within policy evaluation.
+        :param policy: String, either "greedy" or "epsilonGreedy"
+        :param epsilon: Optinal, float, epsilon value for epsilon greedy policy
+        :return: None
+        """
         self.__policyType = policy
         self.__epsilon = epsilon
 
     def __policyWrapper(self):
+        """
+        Wrapper to use policy specified by setPolicy() method.
+        :return:
+        """
         policy_methods = {
             None: lambda: rnd.choice([1, 2, 3, 4]),
             "greedy": lambda: self.policyIteration.greedy(self.qApproximation),
@@ -67,18 +95,32 @@ class MonteCarloPolicyEvaluation:
 
         pass
 
-    def pathConverged(self, count) -> bool:
+    def evalConverged(self, old, new) -> bool:
         """
-        CONVERGENCE Criterium?
-        :param old:
-        :param new:
-        :return:
+        Convergence criterium for Q / V Evaluation: When x% of state-action pairs are below tolerance value qApproximation
+        is converged.
+        :param old: dict qApproximation of state-action-pairs before iteration
+        :param new: dict qApproximation of state-action-pairs after iteration
+        :return: bool
         """
-        # TODO: change to use of q / v approximations
-        if count < self.maxIteration:
+        result = []
+        keys = list(old.keys())
+        for key in keys:
+            if key not in new:
+                result.append(False)
+            elif np.abs(old[key] - new[key]) > self.tol:
+                result.append(False)
+            else:
+                result.append(True)
+        return self.__checkPercentageOfTrue(result)
+
+    def __checkPercentageOfTrue(self, result) -> bool:
+        true_count = sum(result)
+        total_count = len(result)
+        if total_count == 0:
             return False
-        else:
-            return True
+        true_percentage = (true_count / total_count) * 100
+        return true_percentage >= self.__percentage
 
     def policyConverged(self, count) -> bool:
         """
@@ -156,17 +198,14 @@ class MonteCarloPolicyEvaluation:
         while not self.env.isTerminal():  # Sample path
             actions = [1, 2, 3, 4]
             for action in [1, 2, 3, 4]:  # check for valid actions
-                try:
-                    self.env.moveTest(action)
-                except:
-                    actions.remove(action)
-
+                actions.remove(action) if not self.env.moveTest(action) else None
             if self.__currentPolicy is None:
                 action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
                 assert isinstance(self.__currentPolicy, dict)  # self.policy has to be a dict here!
                 try:
-                    action_played = self.__currentPolicy[tuple(self.env.getPosition())] if actions else None
+                    action_played = self.__currentPolicy[
+                        tuple(self.env.getPosition())] if actions else None  # TODO: Check this
                 except:
                     action_played = rnd.choice(actions) if actions else None  # Fallback for
             self.env.moveRestricted(action_played)
@@ -213,11 +252,11 @@ class MonteCarloPolicyEvaluation:
         """
         self.numberIterations = 0
         v_old = {}
-        v_new = {}  # ?
-        while not self.pathConverged(self.numberIterations):
+        v_new = {}
+        while not self.evalConverged(v_old, v_new):
+            v_old = self.valueApproximation.copy()
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
-            v_old = self.valueApproximation  # ?
             for t in range(len(self.pathUntilTermination)):
                 state = self.pathUntilTermination[t]
                 if state not in self.pathUntilTermination[0:t]:
@@ -229,19 +268,19 @@ class MonteCarloPolicyEvaluation:
                                                                       self.visitationsForV[state_as_tuple] + 1)) * \
                                                               self.valueApproximation[state_as_tuple]
                     self.countUpState(state)
-            v_new = self.valueApproximation  # ?
-            self.numberIterations += 1
+            v_new = self.valueApproximation.copy()  # ?
 
     def firstVisitPolicyEvalQ(self) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for action value function.
         :return: None
         """
-        self.numberIterations = 0
-        while not self.pathConverged(self.numberIterations):
+        q_old = {}
+        q_new = {}
+        while not self.evalConverged(q_old, q_new):
+            q_old = self.qApproximation.copy()
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
-            q_old = 0
             for t in range(len(self.stateActionPairs)):
                 sap = self.stateActionPairs[t]
                 if sap not in self.stateActionPairs[0:t]:
@@ -250,7 +289,7 @@ class MonteCarloPolicyEvaluation:
                                                (self.visitationsForQ[sap] / (self.visitationsForQ[sap] + 1)) * \
                                                self.qApproximation[sap]
                     self.countUpStateActionPair(sap[0], sap[1])
-            self.numberIterations += 1
+            q_new = self.qApproximation.copy()
 
     def firstVisitMonteCarloIteration(self) -> None:
         """
@@ -259,13 +298,39 @@ class MonteCarloPolicyEvaluation:
         """
         self.numberIterations = 0
         while not self.policyConverged(self.numberIterations):
-            self.firstVisitPolicyEvalQ()
-            self.performPolicyIterationStep()
-            self.numberIterations += 1
+            while self.validatePolicy():  # Check if policy is valid throughout iteration
+                self.firstVisitPolicyEvalQ()
+                self.performPolicyIterationStep()
+                self.numberIterations += 1
 
     def getCurrentPolicy(self) -> dict:
         return self.__currentPolicy
 
     def performPolicyIterationStep(self) -> None:
+        """
+        Perform one step of policy iteration.
+        :return: None
+        """
         self.__currentPolicy = self.__policyWrapper().copy()
+        pass
+
+    def validatePolicy(self) -> bool:
+        """
+        Check for valid policy for each state.
+        :return: If policy is valid for each state return True, if one state has invalid action, return False.
+        """
+        if self.qApproximation == {}:
+            return True
+        stateActionPairs = list(self.qApproximation.keys())
+        for sap in stateActionPairs:
+            if sap[1] is not None:
+                if not self.env.moveTest(sap[1]):
+                    return False
+        return True
+
+    def vEvalConverged(self, numberIterations):
+        if numberIterations < self.maxIteration:
+            return False
+        else:
+            return True
         pass
