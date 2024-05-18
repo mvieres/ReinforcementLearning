@@ -24,9 +24,9 @@ class MyTestCase(unittest.TestCase):
         mcpe.actionsUntilTermination = [3, 4, 4]
         mcpe.addSamplePathToMetricDicts()
         mcpe.countUpStateActionPair([1, 1], 3)
-        self.assertEqual(1, mcpe.visitationsForQ[((1, 1), 3)])
+        self.assertEqual(1, mcpe.getVisitationsForQ()[((1, 1), 3)])
         mcpe.countUpState([1, 2])
-        self.assertEqual(1, mcpe.visitationsForV[(1, 2)])
+        self.assertEqual(1, mcpe.getVisitationsForV()[(1, 2)])
 
     @unittest.skip("Skip this test")
     def testGeneratePath(self):
@@ -34,7 +34,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.setStartingPoint([0, 0])
         mcpe.setMaxIterations(1000)
         mcpe.generateSamplePaths()
-        if len(mcpe.pathUntilTermination) == mcpe.maxIteration:
+        if len(mcpe.pathUntilTermination) == mcpe.__maxIteration:
             self.skipTest("Max Iteration was reached")
         else:
             self.assertEqual((3, 3), mcpe.pathUntilTermination[-1])
@@ -52,7 +52,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setRewards({(3, 3): 10, (2, 2): -10})
         mcpe.firstVisitPolicyEvalV()
         self.assertTrue(10-0.01 <= mcpe.valueApproximation[(3, 3)] <= 10+0.01)
-        #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01) # TODO: Check this test if cliff point should have value approx of -10
+        #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01)  # TODO: Check this test if cliff point should have value approx of -10
 
     def testFirstVisitMonteCarloQApprox(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
@@ -97,7 +97,7 @@ class MyTestCase(unittest.TestCase):
 
     def testIteratedPolicyForValidActions(self):
         # TODO: This test is outdated and should be rewritten to a cucumber test
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=500)
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
@@ -105,7 +105,11 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(mcpe.validatePolicy())  # TODO: Observed wrong policy, check state - action pairs sampling
 
     def testValidPolicyImprovement(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration = 1000)
+        """
+        Check if valid policy is produced after one iteration step
+        :return:
+        """
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
