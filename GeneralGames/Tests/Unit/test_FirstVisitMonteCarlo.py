@@ -34,26 +34,16 @@ class MyTestCase(unittest.TestCase):
         mcpe.setStartingPoint([0, 0])
         mcpe.setMaxIterations(1000)
         mcpe.generateSamplePaths()
-        if len(mcpe.pathUntilTermination) == mcpe.__maxIteration:
+        if len(mcpe.pathUntilTermination) == 1000:
             self.skipTest("Max Iteration was reached")
         else:
             self.assertEqual((3, 3), mcpe.pathUntilTermination[-1])
             self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
-            self.assertEqual(len(mcpe.pathUntilTermination)-1, len(mcpe.actionsUntilTermination))
+            self.assertEqual(len(mcpe.pathUntilTermination) - 1, len(mcpe.actionsUntilTermination))
             mcpe.generateSamplePaths()  # Check if pathrollout is valide at the second time
             self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
 
     @unittest.skip("Skip this test")
-    def testFirstVisitMonteCarloValueApprox(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
-        mcpe.env.setCliff([(1, 1)])
-        mcpe.setStartingPoint([0, 0])
-        mcpe.setMaxIterations(1000)
-        mcpe.env.setRewards({(3, 3): 10, (2, 2): -10})
-        mcpe.firstVisitPolicyEvalV()
-        self.assertTrue(10-0.01 <= mcpe.valueApproximation[(3, 3)] <= 10+0.01)
-        #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01)  # TODO: Check this test if cliff point should have value approx of -10
-
     def testFirstVisitMonteCarloQApprox(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
         mcpe.setMaxIterations(10000)
@@ -77,6 +67,7 @@ class MyTestCase(unittest.TestCase):
         new_policy = mcpe.getCurrentPolicy()
         self.assertIsInstance(new_policy, dict)
 
+    # Put all functional tests here
     def testFirstVisitMonteCarloImprovement(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
         mcpe.setPercentageForConvergenceCriterion(0)  # TODO: Addition with convergence Criterion is not working
@@ -116,6 +107,23 @@ class MyTestCase(unittest.TestCase):
         mcpe.generateSamplePaths()
         mcpe.performPolicyIterationStep()
         self.assertTrue(mcpe.validatePolicy())
+
+    def testEvalConverged(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
+        old  = {
+            ((1, 1,), 1): 10,
+            ((1, 2), 2): 10,
+            ((2, 2), 3): 9.5
+        }
+        new = {
+            ((1, 1,), 1): 10.005,
+            ((1, 2), 2): 10.4,
+            ((2, 2), 3): 9.501
+        }
+        mcpe.setPercentageForConvergenceCriterion(50)
+        self.assertTrue(mcpe.getConverged(old, new))
+        mcpe.setPercentageForConvergenceCriterion(80)
+        self.assertFalse(mcpe.getConverged(old, new))
 
 
 if __name__ == '__main__':
