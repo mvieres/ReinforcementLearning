@@ -50,7 +50,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
-        mcpe.firstVisitPolicyEvalQ()  # Test Q Value Approx
+        mcpe.policyEvaluationOfQ()
         self.assertEqual(1, 1)
         a = PolicyIteration().greedy(mcpe.qApproximation)
         self.assertEqual(1, 1)
@@ -62,7 +62,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
-        mcpe.firstVisitPolicyEvalQ()
+        mcpe.policyEvaluationOfQ()
         mcpe.performPolicyIterationStep()
         new_policy = mcpe.getCurrentPolicy()
         self.assertIsInstance(new_policy, dict)
@@ -100,7 +100,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitPolicyEvalQ()
+        mcpe.policyEvaluationOfQ()
     def testValidPolicyImprovement(self):
         """
         Check if valid policy is produced after one iteration step
