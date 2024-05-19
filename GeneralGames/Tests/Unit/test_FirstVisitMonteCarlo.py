@@ -74,7 +74,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
+        mcpe.EvaluationAndIteration()
         optimal_policy = mcpe.getCurrentPolicy()
         self.assertEqual(optimal_policy[(3, 2)], 3)
 
@@ -83,24 +83,30 @@ class MyTestCase(unittest.TestCase):
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
+        mcpe.EvaluationAndIteration()
         self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # Okay
 
     def testIteratedPolicyForValidActions(self):
         # TODO: This test is outdated and should be rewritten to a cucumber test
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=1000)
         mcpe.setStartingPoint([0, 0])
-        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
+        mcpe.EvaluationAndIteration()
         self.assertTrue(mcpe.validatePolicy())  # TODO: Observed wrong policy, check state - action pairs sampling
 
+    def testqApproxVisualization(self):
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=1000)
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(1, 1): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.firstVisitPolicyEvalQ()
     def testValidPolicyImprovement(self):
         """
         Check if valid policy is produced after one iteration step
         :return:
         """
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 3, 3, [3, 3], maxIteration=10000)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")

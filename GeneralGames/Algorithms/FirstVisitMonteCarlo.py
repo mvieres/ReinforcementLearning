@@ -283,7 +283,7 @@ class MonteCarloPolicyEvaluation:
                     self.countUpState(state)
             v_new = self.valueApproximation.copy()  # ?
 
-    def firstVisitPolicyEvalQ(self) -> None:
+    def policyEvaluationOfQ(self) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for action value function.
         :return: None
@@ -304,17 +304,21 @@ class MonteCarloPolicyEvaluation:
                     self.countUpStateActionPair(sap[0], sap[1])
             q_new = self.qApproximation.copy()
 
-    def firstVisitMonteCarloIteration(self) -> None:
+    def EvaluationAndIteration(self) -> None:
         """
         Perform first visit monte carlo iteration for Q value.
         :return: None
         """
         self.numberIterations = 0
+
         while not self.policyConverged(self.numberIterations):
-            while self.validatePolicy():  # Check if policy is valid throughout iteration
-                self.firstVisitPolicyEvalQ()
+            print("Number Iteration: ", self.numberIterations)
+            if self.validatePolicy():
+                self.policyEvaluationOfQ()
                 self.performPolicyIterationStep()
                 self.numberIterations += 1
+            else:
+                raise Exception("Policy is not valid for all states")
 
     def getCurrentPolicy(self) -> dict:
         return self.__currentPolicy
@@ -347,3 +351,27 @@ class MonteCarloPolicyEvaluation:
         else:
             return True
         pass
+
+    def visualizeGrid(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.env.getPosition() == [x, y]:
+                    print('P', end='')  # P represents the player
+                elif self.env.goal == [x, y]:
+                    print('G', end='')  # G represents the goal
+                elif [x, y] in self.env.cliff:
+                    print('C', end='')  # C represents the cliff
+                else:
+                    print('.', end='')  # . represents an empty space
+            print()  # print a newline at the end of each row
+
+    def visualizeQApproximation(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                state = (x, y)
+                for action in [1, 2, 3, 4]:  # assuming actions are represented by these numbers
+                    state_action = (state, action)
+                    if state_action in self.qApproximation:
+                        print(f'Q[{state}, {action}]: {self.qApproximation[state_action]}')
+                    else:
+                        print(f'Q[{state}, {action}]: No value')

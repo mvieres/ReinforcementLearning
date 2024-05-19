@@ -12,12 +12,12 @@ class Gridworld:
 
     def __init__(self, width, height, goal):
         self.__rewards = {}
-        self.__width = width
-        self.__height = height
+        self.width = width
+        self.height = height
         self.__boundaries = [width, height]
         self.__player = [None, None]
-        self.__goal = [goal[0], goal[1]]
-        self.__cliff = []
+        self.goal = [goal[0], goal[1]]
+        self.cliff = []
         self.__startingPoint = None
 
     def getPosition(self) -> list:
@@ -38,10 +38,10 @@ class Gridworld:
 
     def setCliff(self, cliff: list) -> None:
         for cliff_vector in cliff:
-            self.__cliff.append(cliff_vector)
+            self.cliff.append(cliff_vector)
 
     def getCliff(self) -> list:
-        return self.__cliff
+        return self.cliff
 
     def setRewards(self, rewards: dict) -> None:
         self.__rewards = rewards
@@ -59,10 +59,10 @@ class Gridworld:
             return False
 
     def isPositiveTerminal(self) -> bool:
-        return self.__player == self.__goal
+        return self.__player == self.goal
 
     def isNegativeTerminal(self) -> bool:
-        return any(all(item in sublist for item in self.__player) for sublist in self.__cliff)
+        return any(all(item in sublist for item in self.__player) for sublist in self.cliff)
 
     def isTerminal(self):
         return self.isPositiveTerminal() or self.isNegativeTerminal()
