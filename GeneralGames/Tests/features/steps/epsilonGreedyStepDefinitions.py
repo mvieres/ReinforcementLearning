@@ -7,6 +7,7 @@ from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 def set_q_values(context):
     pass
 
+
 @then("greedy policy returns maximum value")
 def check_greedy(context):
     greedy_action = PolicyIteration.__transformQValuesDict(context.q_value)

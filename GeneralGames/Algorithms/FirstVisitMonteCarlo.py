@@ -9,7 +9,7 @@ class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
 
-        self.__percentage = 90
+        self.percentage = 90
         self.__currentPolicy = None
         self.width = width
         self.height = height
@@ -51,7 +51,7 @@ class MonteCarloPolicyEvaluation:
         :param percentage: float 1 - 100
         :return: None
         """
-        self.__percentage = percentage
+        self.percentage = percentage
 
     def setWatchPolicyDuringIteration(self, watch: bool) -> None:
         """
@@ -133,7 +133,7 @@ class MonteCarloPolicyEvaluation:
         if total_count == 0:
             return False
         true_percentage = (true_count / total_count) * 100
-        return true_percentage >= self.__percentage
+        return true_percentage >= self.percentage
 
     def policyConverged(self, count) -> bool:
         """
