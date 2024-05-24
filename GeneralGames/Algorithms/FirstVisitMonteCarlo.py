@@ -258,7 +258,7 @@ class MonteCarloPolicyEvaluation:
             reward += self.__gamma ** (t - timeIndex) * self.env.rolloutReward(state)
         return reward
 
-    def firstVisitPolicyEvalV(self) -> None:
+    def policyEvaluationForV(self) -> None:
         """
         Perform first visit monte carlo evaluation of given policy for value function.
         :return: None
@@ -328,6 +328,7 @@ class MonteCarloPolicyEvaluation:
         Perform one step of policy iteration.
         :return: None
         """
+        # TODO: testing for this method
         self.__currentPolicy = self.__policyWrapper().copy()
         pass
 
@@ -372,6 +373,6 @@ class MonteCarloPolicyEvaluation:
                 for action in [1, 2, 3, 4]:  # assuming actions are represented by these numbers
                     state_action = (state, action)
                     if state_action in self.qApproximation:
-                        print(f'Q[{state}, {action}]: {self.qApproximation[state_action]}')
+                        print(f'Q[{state}, {action}]: {self.qApproximation[state_action]} {self.env.moveTest(action)}')
                     else:
-                        print(f'Q[{state}, {action}]: No value')
+                        print(f'Q[{state}, {action}]: No value {self.env.moveTest(action)}')
