@@ -101,18 +101,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
         mcpe.policyEvaluationOfQ()
-    def testValidPolicyImprovement(self):
-        """
-        Check if valid policy is produced after one iteration step
-        :return:
-        """
-        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 3, 3, [3, 3], maxIteration=10000)
-        mcpe.setStartingPoint([0, 0])
-        mcpe.env.setRewards({(3, 3): 10})
-        mcpe.setPolicy("greedy")
-        mcpe.generateSamplePaths()
-        mcpe.performPolicyIterationStep()
-        self.assertTrue(mcpe.validatePolicy())
+        mcpe.visualizeQApproximation()
 
     def testEvalConverged(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
@@ -130,6 +119,15 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(mcpe.getConverged(old, new))
         mcpe.setPercentageForConvergenceCriterion(80)
         self.assertFalse(mcpe.getConverged(old, new))
+
+    def testPerformPolicyIterationStep(self):
+        mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 1, 1, [1, 1], maxIteration=1000)
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(1, 1): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.policyEvaluationOfQ()
+        mcpe.performPolicyIterationStep()
+        self.assertTrue(mcpe.validatePolicy())
 
 
 if __name__ == '__main__':
