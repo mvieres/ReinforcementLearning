@@ -4,10 +4,12 @@ Feature: Verfiy movement of player in grid
   -> first number indicates x axis
   -> second number indicates y axis
   Implementation count starts at 0
+
+  Choose width = 3 and height = 1. Goal is at (3, 1). Agent starts at (0,0)
   """
   Scenario: Asymmetric grid and player is moved by hand
-    Given Gridworld is initialized with dimensions <(3, 1)> and goal <(3, 1)>
-    And agent starts at <(0, 0)>
+    Given Gridworld is initialized with dimensions
+    And agent starts at origin
     And player is moved according to right right right up manually
-    Then player is at (1, 3) and is in terminal state
+    Then player is at goal and in terminal state
     

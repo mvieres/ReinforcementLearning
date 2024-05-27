@@ -1,16 +1,17 @@
 import numpy as np
+import numpy.random as rnd
 
 from ..Environments import Environments
 from ..Algorithms import PolicyIteration
-import numpy.random as rnd
+from .AbstractAlgorithm import AbstractAlgorithm
 
 
-class MonteCarloPolicyEvaluation:
+class MonteCarloPolicyEvaluation(AbstractAlgorithm):
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
-
+        super().__init__()
         self.percentage = 90
-        self.__currentPolicy = None
+        self.__currentPolicy = {}
         self.width = width
         self.height = height
         self.__maxIteration = maxIteration
@@ -211,7 +212,7 @@ class MonteCarloPolicyEvaluation:
         while not self.env.isTerminal():  # Sample path
             actions = [1, 2, 3, 4]
             for action in [1, 2, 3, 4]:  # check for valid actions
-                actions.remove(action) if not self.env.moveTest(action) else None
+                actions.remove(action) if not self.env.moveTest(action, None) else None
             if self.__currentPolicy is None:
                 action_played = rnd.choice(actions) if actions else None  # Uniform Sampling
             else:
@@ -323,6 +324,9 @@ class MonteCarloPolicyEvaluation:
     def getCurrentPolicy(self) -> dict:
         return self.__currentPolicy
 
+    def setCurrentPolicy(self, policy: dict) -> None:
+        self.__currentPolicy = policy
+
     def performPolicyIterationStep(self) -> None:
         """
         Perform one step of policy iteration.
@@ -334,15 +338,16 @@ class MonteCarloPolicyEvaluation:
 
     def validatePolicy(self) -> bool:
         """
-        Check for valid policy for each state.
+        Check for current policy for each state action pair if action is valid.
         :return: If policy is valid for each state return True, if one state has invalid action, return False.
         """
-        if self.qApproximation == {}:
+        if self.__currentPolicy == {}:
             return True
-        stateActionPairs = list(self.qApproximation.keys())
-        for sap in stateActionPairs:
-            if sap[1] is not None:
-                if not self.env.moveTest(sap[1]):
+        states = list(self.__currentPolicy.keys())
+        for state in states:
+            action = self.__currentPolicy[state]
+            if action is not None:
+                if not self.env.moveTest(action, state):
                     return False
         return True
 
@@ -373,6 +378,6 @@ class MonteCarloPolicyEvaluation:
                 for action in [1, 2, 3, 4]:  # assuming actions are represented by these numbers
                     state_action = (state, action)
                     if state_action in self.qApproximation:
-                        print(f'Q[{state}, {action}]: {self.qApproximation[state_action]} {self.env.moveTest(action)}')
+                        print(f'Q[{state}, {action}]: {self.qApproximation[state_action]} {self.env.moveTest(action, None)}')
                     else:
-                        print(f'Q[{state}, {action}]: No value {self.env.moveTest(action)}')
+                        print(f'Q[{state}, {action}]: No value {self.env.moveTest(action, None)}')
