@@ -177,12 +177,17 @@ class Gridworld:
             self.__player[0] -= 1
             return False
 
-    def moveTest(self, direction) -> bool:
+    def moveTest(self, direction: int, state=None) -> bool:
         """
-        Testing a move direction without actully moving the player
-        :param direction:
+        Testing a move direction without actually moving the player
+        :param state: State from which action is supposed to be executed (optional input as tuple)
+        :param direction: action = 1: down, 2: left, 3: up, 4: right
         :return:
         """
+        if state is not None:
+            original_position = self.__player.copy()
+            self.__player = list(state).copy()  # Copy might be not necessary
+
         moves = {
             1: self.__downTest,
             2: self.__leftTest,
@@ -192,7 +197,11 @@ class Gridworld:
 
         if direction not in moves:
             raise AssertionError("Step rollout failed")
-        return moves[direction]()
+        result = moves[direction]()
+        if state is not None:
+            self.__player = original_position.copy()
+        return result
+
 
     def rolloutReward(self, state: list) -> float:
         # Rollout strictly for Gridworld reward profiles

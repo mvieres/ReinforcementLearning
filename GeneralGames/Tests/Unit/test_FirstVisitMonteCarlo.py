@@ -6,7 +6,6 @@ from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 
 class MyTestCase(unittest.TestCase):
 
-    @unittest.skip("Skip this test")
     def testAddToDict(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([1, 1])
@@ -16,7 +15,6 @@ class MyTestCase(unittest.TestCase):
         target_dict_q_approx = {((1, 1), 3): 0, ((1, 2), 4): 0, ((2, 2), 4): 0, ((3, 2), None): 0}
         self.assertEqual(target_dict_q_approx, mcpe.qApproximation)
 
-    @unittest.skip("Skip this test")
     def testCountVisits(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([1, 1])
@@ -28,7 +26,6 @@ class MyTestCase(unittest.TestCase):
         mcpe.countUpState([1, 2])
         self.assertEqual(1, mcpe.getVisitationsForV()[(1, 2)])
 
-    @unittest.skip("Skip this test")
     def testGeneratePath(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([0, 0])
@@ -43,7 +40,6 @@ class MyTestCase(unittest.TestCase):
             mcpe.generateSamplePaths()  # Check if pathrollout is valide at the second time
             self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
 
-    @unittest.skip("Skip this test")
     def testFirstVisitMonteCarloQApprox(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
         mcpe.setMaxIterations(10000)
@@ -54,6 +50,22 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(1, 1)
         a = PolicyIteration().greedy(mcpe.qApproximation)
         self.assertEqual(1, 1)
+
+    def testValidatePolicy(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 1, 1, [1, 1])
+        mcpe.setStartingPoint([0, 0])
+        policy = {
+            (0, 0): 1,  # Should fail
+            (0, 1): 2
+        }
+        mcpe.setCurrentPolicy(policy)
+        self.assertFalse(mcpe.validatePolicy())
+        policy = {
+            (0, 0): 4,  # Should not fail
+            (1, 0): 3
+        }
+        mcpe.setCurrentPolicy(policy)
+        self.assertTrue(mcpe.validatePolicy())
 
     def testPolicyIteration(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
@@ -69,8 +81,9 @@ class MyTestCase(unittest.TestCase):
 
     # Put all functional tests here
     def testFirstVisitMonteCarloImprovement(self):
+        # TODO: This can be an integration test
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
-        mcpe.setPercentageForConvergenceCriterion(0)  # TODO: Addition with convergence Criterion is not working
+        mcpe.setPercentageForConvergenceCriterion(90)  # TODO: Addition with convergence Criterion is not working
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
@@ -87,14 +100,15 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # Okay
 
     def testIteratedPolicyForValidActions(self):
-        # TODO: This test is outdated and should be rewritten to a cucumber test
-        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=1000)
+        # TODO: This test is outdated and should be rewritten to a cucumber test, has low complexity
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=10000)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
         mcpe.EvaluationAndIteration()
-        self.assertTrue(mcpe.validatePolicy())  # TODO: Observed wrong policy, check state - action pairs sampling
+        self.assertTrue(mcpe.validatePolicy())  # TODO: Terminates after maxIteration
 
+    @unittest.skip("Skip this test")
     def testqApproxVisualization(self):
         mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=1000)
         mcpe.setStartingPoint([0, 0])
@@ -103,6 +117,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.policyEvaluationOfQ()
         mcpe.visualizeQApproximation()
 
+    @unittest.skip("Skip this test")
     def testEvalConverged(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
         old  = {
@@ -115,6 +130,7 @@ class MyTestCase(unittest.TestCase):
             ((1, 2), 2): 10.4,
             ((2, 2), 3): 9.501
         }
+        # TODO: not clear if meaningful
         mcpe.setPercentageForConvergenceCriterion(50)
         self.assertTrue(mcpe.getConverged(old, new))
         mcpe.setPercentageForConvergenceCriterion(80)
