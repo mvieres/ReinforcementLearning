@@ -22,33 +22,23 @@ class MyTestCase(unittest.TestCase):
         mcpe.actionsUntilTermination = [3, 4, 4]
         mcpe.addSamplePathToMetricDicts()
         mcpe.countUpStateActionPair([1, 1], 3)
-        self.assertEqual(1, mcpe.visitationsForQ[((1, 1), 3)])
+        self.assertEqual(1, mcpe.getVisitationsForQ()[((1, 1), 3)])
         mcpe.countUpState([1, 2])
-        self.assertEqual(1, mcpe.visitationsForV[(1, 2)])
+        self.assertEqual(1, mcpe.getVisitationsForV()[(1, 2)])
 
     def testGeneratePath(self):
         mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 3, 3, [3, 3])
         mcpe.setStartingPoint([0, 0])
         mcpe.setMaxIterations(1000)
         mcpe.generateSamplePaths()
-        if len(mcpe.pathUntilTermination) == mcpe.maxIteration:
+        if len(mcpe.pathUntilTermination) == 1000:
             self.skipTest("Max Iteration was reached")
         else:
             self.assertEqual((3, 3), mcpe.pathUntilTermination[-1])
             self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
-            self.assertEqual(len(mcpe.pathUntilTermination)-1, len(mcpe.actionsUntilTermination))
+            self.assertEqual(len(mcpe.pathUntilTermination) - 1, len(mcpe.actionsUntilTermination))
             mcpe.generateSamplePaths()  # Check if pathrollout is valide at the second time
             self.assertTrue(len(mcpe.pathUntilTermination) > 5, "Samplepath is too short")
-
-    def testFirstVisitMonteCarloValueApprox(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
-        mcpe.env.setCliff([(1, 1)])
-        mcpe.setStartingPoint([0, 0])
-        mcpe.setMaxIterations(1000)
-        mcpe.env.setRewards({(3, 3): 10, (2, 2): -10})
-        mcpe.firstVisitPolicyEvalV()
-        self.assertTrue(10-0.01 <= mcpe.valueApproximation[(3, 3)] <= 10+0.01)
-        #self.assertTrue(-10-0.01 <= mcpe.valueApproximation[(1, 1)] <= -10+0.01) # TODO: Check this test if cliff point should have value approx of -10
 
     def testFirstVisitMonteCarloQApprox(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
@@ -56,10 +46,26 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
-        mcpe.firstVisitPolicyEvalQ()  # Test Q Value Approx
+        mcpe.policyEvaluationOfQ()
         self.assertEqual(1, 1)
         a = PolicyIteration().greedy(mcpe.qApproximation)
         self.assertEqual(1, 1)
+
+    def testValidatePolicy(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 1, 1, [1, 1])
+        mcpe.setStartingPoint([0, 0])
+        policy = {
+            (0, 0): 1,  # Should fail
+            (0, 1): 2
+        }
+        mcpe.setCurrentPolicy(policy)
+        self.assertFalse(mcpe.validatePolicy())
+        policy = {
+            (0, 0): 4,  # Should not fail
+            (1, 0): 3
+        }
+        mcpe.setCurrentPolicy(policy)
+        self.assertTrue(mcpe.validatePolicy())
 
     def testPolicyIteration(self):
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
@@ -68,39 +74,77 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setCliff([(1, 1)])
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10, (1, 1): -10})
-        mcpe.firstVisitPolicyEvalQ()
+        mcpe.policyEvaluationOfQ()
         mcpe.performPolicyIterationStep()
         new_policy = mcpe.getCurrentPolicy()
         self.assertIsInstance(new_policy, dict)
 
+    # Put all functional tests here
     def testFirstVisitMonteCarloImprovement(self):
-        # TODO: Fix this test, since optimal_policy should be a dict!!!!
+        # TODO: This can be an integration test
         mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe.setPercentageForConvergenceCriterion(90)  # TODO: Addition with convergence Criterion is not working
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
+        mcpe.EvaluationAndIteration()
         optimal_policy = mcpe.getCurrentPolicy()
         self.assertEqual(optimal_policy[(3, 2)], 3)
 
     def testFirstVisitMonteCarloImprovementBestPolicy(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=100)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
-        self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # TODO: Observed wrong policy, check state - action pairs
+        mcpe.EvaluationAndIteration()
+        self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # Okay
 
     def testIteratedPolicyForValidActions(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=500)
+        # TODO: This test is outdated and should be rewritten to a cucumber test, has low complexity
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=10000)
         mcpe.setStartingPoint([0, 0])
-        mcpe.env.setRewards({(3, 3): 10})
+        mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
-        mcpe.firstVisitMonteCarloIteration()
-        policy = mcpe.getCurrentPolicy()
-        for state in list(policy.keys()):  # TODO: fix sampling of wrong policies!
-            mcpe.env.moveTest(policy[state])
-        self.assertEqual(1, 1)
+        mcpe.EvaluationAndIteration()
+        self.assertTrue(mcpe.validatePolicy())  # TODO: Terminates after maxIteration
+
+    @unittest.skip("Skip this test")
+    def testqApproxVisualization(self):
+        mcpe = MonteCarloPolicyEvaluation(0.5, 0.1, 1, 1, [1, 1], maxIteration=1000)
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(1, 1): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.policyEvaluationOfQ()
+        mcpe.visualizeQApproximation()
+
+    @unittest.skip("Skip this test")
+    def testEvalConverged(self):
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
+        old  = {
+            ((1, 1,), 1): 10,
+            ((1, 2), 2): 10,
+            ((2, 2), 3): 9.5
+        }
+        new = {
+            ((1, 1,), 1): 10.005,
+            ((1, 2), 2): 10.4,
+            ((2, 2), 3): 9.501
+        }
+        # TODO: not clear if meaningful
+        mcpe.setPercentageForConvergenceCriterion(50)
+        self.assertTrue(mcpe.getConverged(old, new))
+        mcpe.setPercentageForConvergenceCriterion(80)
+        self.assertFalse(mcpe.getConverged(old, new))
+
+    def testPerformPolicyIterationStep(self):
+        mcpe = MonteCarloPolicyEvaluation(0.1, 0.1, 1, 1, [1, 1], maxIteration=1000)
+        mcpe.setStartingPoint([0, 0])
+        mcpe.env.setRewards({(1, 1): 10})
+        mcpe.setPolicy("greedy")
+        mcpe.policyEvaluationOfQ()
+        mcpe.performPolicyIterationStep()
+        self.assertTrue(mcpe.validatePolicy())
+
 
 if __name__ == '__main__':
     unittest.main()

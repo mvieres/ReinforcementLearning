@@ -25,6 +25,11 @@ class PolicyIteration:
         return return_dict
 
     def greedy(self, d: dict) -> dict:
+        """
+        Performs greedy policy improvement based on the Q-Values
+        :param d:
+        :return:
+        """
         transformed_dict = self.transformQValuesDict(d)
         res = {}
         for state in list(transformed_dict.keys()):
@@ -33,6 +38,13 @@ class PolicyIteration:
         return res
 
     def epsilonGreedy(self, d: dict, epsilon: float) -> dict:
+        """
+        Performs epsilon greedy policy improvement based on the "random" factor epsilon. A random action is chosen if
+        uniform(0,1) < epsilon.
+        :param d: dict with key: (state, action), values: rewards
+        :param epsilon: Probability to choose a random action instead of the greedy one
+        :return: dict with key: state, values: action
+        """
         transformed_dict = self.transformQValuesDict(d)
         res = {}
         for state in list(transformed_dict.keys()):

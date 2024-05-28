@@ -5,9 +5,6 @@ from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
 
 class MyTestCase(unittest.TestCase):
 
-    def __int__(self):
-        pass
-
     def test_greedy(self):
         d = {
             ((1, 1), 2): 10,
@@ -23,6 +20,27 @@ class MyTestCase(unittest.TestCase):
             (2, 2): 4
         }
         self.assertEqual(PolicyIteration().greedy(d), supposed_output)
+
+    def test_epsilonGreedy(self):
+        """
+        This is a meaningless test due to epsilon = 0 => epsilonGreedy = greedy
+        :return:
+        """
+        # TODO: Implement reasonable test
+        d = {
+            ((1, 1), 2): 10,
+            ((1, 2), 1): 20,
+            ((2, 2), 3): 30,
+            ((1, 1), 1): 40,
+            ((2, 2), 2): 50,
+            ((2, 2), 4): 60,
+        }
+        supposed_output = {
+            (1, 1): 1,
+            (1, 2): 1,
+            (2, 2): 4
+        }
+        self.assertEqual(PolicyIteration().epsilonGreedy(d, 0), supposed_output)
 
     def test_listq(self):
         q_dict = {
