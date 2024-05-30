@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.random as rnd
 
-from ..Environments import Environments
+from ..Environments import Gridworld
 from ..Algorithms import PolicyIteration
 from .AbstractAlgorithm import AbstractAlgorithm
 

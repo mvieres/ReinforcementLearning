@@ -82,7 +82,7 @@ class MyTestCase(unittest.TestCase):
     # Put all functional tests here
     def testFirstVisitMonteCarloImprovement(self):
         # TODO: This can be an integration test
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3])
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=1000)
         mcpe.setPercentageForConvergenceCriterion(90)  # TODO: Addition with convergence Criterion is not working
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})

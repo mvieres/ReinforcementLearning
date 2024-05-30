@@ -1,5 +1,5 @@
 from behave import *
-from GeneralGames.Environments import Environments
+from GeneralGames.Environments import Gridworld
 
 use_step_matcher("re")
 
