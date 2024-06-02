@@ -2,7 +2,8 @@ from enum import Enum
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, number: int):
+        self.__playerNumber = number
         self.__policy = {}
         self.__fields = []  # List of tuples, i.e. [(1, 1), (1, 2), ...]
         pass
@@ -41,15 +42,11 @@ class Hex:
     The board is modeled as a hexagonal grid with a size of n x n. Player one plays from top to bottom and player two
     from left to right.
     """
-    def __init__(self):
-        self.__boardsize = 0
-        self.player1 = Player()
-        self.player2 = Player()
+    def __init__(self, size: int):
+        self.__size = size
+        self.player1 = Player(1)
+        self.player2 = Player(2)
         self.takenFields = []
 
     def setBoardSize(self, size):
-        self.__boardsize = size
-
-    def isInBondaries(self, player: Player):
-        player.getPosition()
-        pass
+        self.__size = size
