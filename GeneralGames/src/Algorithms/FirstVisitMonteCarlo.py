@@ -3,7 +3,6 @@ import numpy.random as rnd
 
 from ..Environments import Environments
 from ..Algorithms import PolicyIteration
-from .AbstractAlgorithm import AbstractAlgorithm
 
 
 class MonteCarloPolicyEvaluation:

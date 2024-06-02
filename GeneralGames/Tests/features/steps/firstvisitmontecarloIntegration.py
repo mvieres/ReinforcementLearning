@@ -1,8 +1,6 @@
 from behave import *
 
-from GeneralGames.Environments import Environments
-from GeneralGames.Algorithms import PolicyIteration
-from GeneralGames.Algorithms import FirstVisitMonteCarlo
+from GeneralGames.src.Algorithms import FirstVisitMonteCarlo
 
 use_step_matcher("re")
 

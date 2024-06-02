@@ -1,6 +1,6 @@
 import unittest
 
-from GeneralGames.Algorithms.PolicyIteration import PolicyIteration
+from GeneralGames.src.Algorithms.PolicyIteration import PolicyIteration
 
 
 class MyTestCase(unittest.TestCase):

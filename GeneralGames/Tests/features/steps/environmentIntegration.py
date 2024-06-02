@@ -1,5 +1,5 @@
 from behave import *
-from GeneralGames.Environments import Environments
+from GeneralGames.src.Environments import Environments
 
 use_step_matcher("re")
 
