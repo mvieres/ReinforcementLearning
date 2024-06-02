@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from GeneralGames.src.Environments.Environments import Gridworld
-from GeneralGames.src.Environments.Environments import DirectionsGridWorld as DGW
+from GeneralGames.src.Environments.Gridworld import Gridworld
+from GeneralGames.src.Environments.Gridworld import DirectionsGridWorld as DGW
 
 
 class TestGridworldDirections(unittest.TestCase):
