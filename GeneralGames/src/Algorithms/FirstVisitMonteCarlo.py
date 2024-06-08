@@ -312,7 +312,6 @@ class MonteCarloPolicyEvaluation:
         self.numberIterations = 0
 
         while not self.policyConverged(self.numberIterations):
-            print("Number Iteration: ", self.numberIterations)
             if self.validatePolicy():
                 self.policyEvaluationOfQ()
                 self.performPolicyIterationStep()
