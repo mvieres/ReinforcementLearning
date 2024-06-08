@@ -1,14 +1,15 @@
 import numpy as np
 import numpy.random as rnd
 
+from .AbstractAlgorithm import AbstractAlgorithm
 from ..Environments import Gridworld
 from ..Algorithms import PolicyIteration
 
 
-class MonteCarloPolicyEvaluation:
+class MonteCarloPolicyEvaluation(AbstractAlgorithm):
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
-        #super().__init__()
+        super().__init__(tol)
         self.percentage = 90
         self.__currentPolicy = {}
         self.width = width
@@ -17,7 +18,7 @@ class MonteCarloPolicyEvaluation:
         self.__policyType = None
         self.initialDistribution = initialDistribution
         self.pathUntilTermination = []
-        self.tol = tol
+        #self.tol = tol
         self.__visitationsForV = {}
         self.__visitationsForQ = {}
         self.env = Gridworld.Gridworld(width, height, goal)
@@ -44,14 +45,6 @@ class MonteCarloPolicyEvaluation:
 
     def getQApproximation(self) -> dict:
         return self.qApproximation
-
-    def setPercentageForConvergenceCriterion(self, percentage: float) -> None:
-        """
-        Default is: 90% of state-action pairs have to be below the tolerance value.
-        :param percentage: float 1 - 100
-        :return: None
-        """
-        self.percentage = percentage
 
     def setWatchPolicyDuringIteration(self, watch: bool) -> None:
         """
@@ -101,52 +94,8 @@ class MonteCarloPolicyEvaluation:
         self.actionsUntilTermination.append(self.__actionPlayed)
         pass
 
-    def __evalConverged(self, old, new) -> bool:
-        """
-        Convergence criterium for Q / V Evaluation: When x% of state-action pairs are below tolerance value qApproximation
-        is converged.
-        :param old: dict qApproximation of state-action-pairs before iteration
-        :param new: dict qApproximation of state-action-pairs after iteration
-        :return: bool
-        """
-        # TODO: Convergence does not work -> endless loop. Check this
-        result = []
-        keys = list(old.keys())
-        if self.__numberOfIterations == self.__maxIteration:
-            return True
-        for key in keys:
-            if key not in new:
-                result.append(False)
-            elif np.abs(old[key] - new[key]) > self.tol:
-                result.append(False)
-            else:
-                result.append(True)
-        self.__numberOfIterations += 1  # TODO: is this right?
-        return self.__checkPercentageOfTrue(result)
-
     def getConverged(self, old: dict, new: dict) -> bool:
-        return self.__evalConverged(old, new)
-
-    def __checkPercentageOfTrue(self, result) -> bool:
-        true_count = sum(result)
-        total_count = len(result)
-        if total_count == 0:
-            return False
-        true_percentage = (true_count / total_count) * 100
-        return true_percentage >= self.percentage
-
-    def policyConverged(self, count) -> bool:
-        """
-        CONVERGENCE Criterium?
-        :param old:
-        :param new:
-        :return:
-        """
-        # TODO: implement right convergence criterium
-        if count < self.__maxIteration:
-            return False
-        else:
-            return True
+        return self.evalConverged(old, new)
 
     def addSamplePathToMetricDicts(self) -> None:
         """
@@ -263,10 +212,10 @@ class MonteCarloPolicyEvaluation:
         Perform first visit monte carlo evaluation of given policy for value function.
         :return: None
         """
-        self.numberIterations = 0
+        self.numberIterations = 0  # TODO: This design pattern is suboptimal w.r.t evalConverged -> operates on self.numberIterations
         v_old = {}
         v_new = {}
-        while not self.__evalConverged(v_old, v_new):
+        while not self.evalConverged(v_old, v_new):
             v_old = self.valueApproximation.copy()
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
@@ -290,7 +239,7 @@ class MonteCarloPolicyEvaluation:
         """
         q_old = {}
         q_new = {}
-        while not self.__evalConverged(q_old, q_new):
+        while not super().evalConverged(q_old, q_new):
             q_old = self.qApproximation.copy()
             self.generateSamplePaths()
             self.addSamplePathToMetricDicts()
@@ -310,12 +259,14 @@ class MonteCarloPolicyEvaluation:
         :return: None
         """
         self.numberIterations = 0
-
-        while not self.policyConverged(self.numberIterations):
+        q_old = self.qApproximation.copy()
+        q_new = None
+        while not self.policyConverged(q_old, q_new):
+            q_old = self.qApproximation.copy()
             if self.validatePolicy():
                 self.policyEvaluationOfQ()
                 self.performPolicyIterationStep()
-                self.numberIterations += 1
+                q_new = self.qApproximation.copy()
             else:
                 raise Exception("Policy is not valid for all states")
 
@@ -330,7 +281,6 @@ class MonteCarloPolicyEvaluation:
         Perform one step of policy iteration.
         :return: None
         """
-        # TODO: testing for this method
         self.__currentPolicy = self.__policyWrapper().copy()
         pass
 

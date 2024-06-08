@@ -94,12 +94,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(optimal_policy[(3, 2)], 3)
 
     def testFirstVisitMonteCarloImprovementBestPolicy(self):
-        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=100)
+        mcpe = MonteCarloPolicyEvaluation(0.01, 0.1, 3, 3, [3, 3], maxIteration=10000)
         mcpe.setStartingPoint([0, 0])
         mcpe.env.setRewards({(3, 3): 10})
         mcpe.setPolicy("greedy")
         mcpe.EvaluationAndIteration()
-        self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # Okay
+        self.assertEqual(mcpe.getCurrentPolicy()[(3, 2)], 3)  # TODO: Iteration stops but policy is not optimal
 
     def testIteratedPolicyForValidActions(self):
         # TODO: This test is outdated and should be rewritten to a cucumber test, has low complexity
@@ -108,7 +108,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.env.setRewards({(1, 1): 10})
         mcpe.setPolicy("greedy")
         mcpe.EvaluationAndIteration()
-        self.assertTrue(mcpe.validatePolicy())  # TODO: Terminates after maxIteration
+        self.assertTrue(mcpe.validatePolicy())
 
     @unittest.skip("Skip this test")
     def testqApproxVisualization(self):
@@ -145,8 +145,7 @@ class MyTestCase(unittest.TestCase):
         mcpe.setPolicy("greedy")
         mcpe.policyEvaluationOfQ()
         mcpe.performPolicyIterationStep()
-        self.assertTrue(mcpe.validatePolicy())
-
+        self.assertTrue(mcpe.validatePolicy())  # Valid policy
 
 
 if __name__ == '__main__':
