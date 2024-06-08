@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from GeneralGames.Environments.Environments import Gridworld
-from GeneralGames.Environments.Environments import DirectionsGridWorld as DGW
+from GeneralGames.src.Environments.Gridworld import Gridworld
+from GeneralGames.src.Environments.Gridworld import DirectionsGridWorld as DGW
 
 
 class TestGridworldDirections(unittest.TestCase):
@@ -66,21 +66,6 @@ class TestGridWorld(unittest.TestCase):
         gridworld.setRewards({(1, 1): 10})
         self.assertEqual(10, gridworld.rolloutReward([1, 1]))
         self.assertEqual(0, gridworld.rolloutReward([1, 2]))
-
-    def testDicts(self):
-        dict = {((1, 1), 1): 10, ((2, 2), 1): 4}
-        a = list(dict.keys())
-        b = a[0]
-
-    def testMoreDict(self):
-        d ={
-            (1, 1): [(2, 10), (1, 40)],
-            (1, 2): [(1, 20)],
-            (2, 2): [(3, 30), (2, 50), (4, 60)]
-        }
-        b = d[(1, 1)]
-        a = [b[_][1] for _ in range(len(b))]
-        c = b[np.argmax(a)][0]
 
 
 if __name__ == '__main__':

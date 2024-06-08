@@ -1,15 +1,14 @@
 import numpy as np
 import numpy.random as rnd
 
-from ..Environments import Environments
+from ..Environments import Gridworld
 from ..Algorithms import PolicyIteration
-from .AbstractAlgorithm import AbstractAlgorithm
 
 
-class MonteCarloPolicyEvaluation(AbstractAlgorithm):
+class MonteCarloPolicyEvaluation:
 
     def __init__(self, tol, gamma, width, height, goal, initialDistribution=None, maxIteration=10000):
-        super().__init__()
+        #super().__init__()
         self.percentage = 90
         self.__currentPolicy = {}
         self.width = width
@@ -122,7 +121,7 @@ class MonteCarloPolicyEvaluation(AbstractAlgorithm):
                 result.append(False)
             else:
                 result.append(True)
-        self.__numberOfIterations += 1
+        self.__numberOfIterations += 1  # TODO: is this right?
         return self.__checkPercentageOfTrue(result)
 
     def getConverged(self, old: dict, new: dict) -> bool:

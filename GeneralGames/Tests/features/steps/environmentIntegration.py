@@ -1,5 +1,5 @@
 from behave import *
-from GeneralGames.Environments import Environments
+from GeneralGames.src.Environments import Gridworld
 
 use_step_matcher("re")
 
@@ -11,7 +11,7 @@ def step_impl(context):
     :type arg1: str
     :type context: behave.runner.Context
     """
-    context.gridworld = Environments.Gridworld(3, 1, (3, 1))
+    context.gridworld = Gridworld.Gridworld(3, 1, (3, 1))
 
 
 @step("agent starts at origin")
