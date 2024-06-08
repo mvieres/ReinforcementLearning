@@ -20,7 +20,7 @@ class MonteCarloPolicyEvaluation:
         self.tol = tol
         self.__visitationsForV = {}
         self.__visitationsForQ = {}
-        self.env = Environments.Gridworld(width, height, goal)
+        self.env = Gridworld.Gridworld(width, height, goal)
         self.__gamma = gamma
         self.valueApproximation = {}
         self.numberIterations = 0
